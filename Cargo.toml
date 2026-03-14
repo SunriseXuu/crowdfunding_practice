@@ -1,0 +1,43 @@
+[package]
+name = "crowdfunding_practice"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Web 框架
+axum = "0.8"
+
+# 异步运行时
+tokio = { version = "1", features = ["full"] }
+
+# 数据库驱动
+sqlx = { version = "0.8", features = [
+    "postgres",
+    "runtime-tokio",
+    "tls-rustls",
+    "chrono",
+    "uuid",
+    "macros",
+    "migrate"
+] }
+
+# 数据校验
+validator = { version = "0.20", features = ["derive"] }
+
+# 错误处理
+thiserror = "2.0"
+
+# 中间件与日志
+tower-http = { version = "0.6", features = ["trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 序列化/反序列化
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# 环境变量与实用工具
+dotenvy = "0.15"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+jsonwebtoken = { version = "10", default-features = false, features = ["rust_crypto"] }
