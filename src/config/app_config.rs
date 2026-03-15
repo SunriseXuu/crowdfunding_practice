@@ -17,6 +17,7 @@ impl AppConfig {
         // 使用 .ok() 是因为在真正的生产容器里（不用 .env 文件），找不到它也不该报错。
         dotenvy::dotenv().ok();
 
+        // 数据库连接字符串，必须在 .env 中显式设定，否则无法启动
         let database_url = env::var("DATABASE_URL")
             .expect("🚨 FATAL: DATABASE_URL must be set in .env or system environment");
 
@@ -26,9 +27,9 @@ impl AppConfig {
             .parse::<u16>()
             .expect("🚨 FATAL: PORT must be a valid number");
 
-        // 暂定一个 default 的鉴权密钥。后续做到 User 服务时我们再强制迁移到 .env
-        let jwt_secret =
-            env::var("JWT_SECRET").unwrap_or_else(|_| "super-secret-key-for-dev".to_string());
+        // JWT_SECRET 在 .env 中必须显式设定，绝不允许使用 default 值跑生产环境
+        let jwt_secret = env::var("JWT_SECRET")
+            .expect("🚨 FATAL: JWT_SECRET must be set in .env or system environment");
 
         Self {
             database_url,
