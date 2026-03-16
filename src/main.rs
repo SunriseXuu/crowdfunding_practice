@@ -1,6 +1,7 @@
 mod config;
 mod dto;
 mod error;
+mod util;
 
 use config::AppConfig;
 use sqlx::postgres::PgPoolOptions;
