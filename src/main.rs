@@ -1,6 +1,10 @@
 mod config;
 mod dto;
 mod error;
+mod handler;
+mod model;
+mod repository;
+mod service;
 mod util;
 
 use config::AppConfig;
@@ -8,7 +12,7 @@ use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tracing::info;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 /// AppState 是整个应用的"全局共享上下文"。
 ///
@@ -18,7 +22,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 /// Arc（原子引用计数）可以安全地让多个所有者共享同一份数据，而不用复制它。
 #[derive(Clone)]
 pub struct AppState {
-    pub db: sqlx::PgPool,
+    pub pool: sqlx::PgPool,
     pub config: Arc<AppConfig>,
 }
 
@@ -41,7 +45,7 @@ async fn main() {
     // 类比前端的 HTTP 客户端池：与其每个请求都新建/销毁一个 TCP 连接，
     // 连接池会预先建立若干条数据库连接并复用它们，大幅降低连接开销。
     let pool = PgPoolOptions::new()
-        .max_connections(20)     // 最多同时维持 20 条物理连接
+        .max_connections(20) // 最多同时维持 20 条物理连接
         .connect(&config.database_url)
         .await
         .expect("🚨 FATAL: Cannot connect to the database. Is Docker Postgres running?");
@@ -50,16 +54,13 @@ async fn main() {
 
     // ── 步骤四：组装全局 AppState ────────────────────────────────────────────
     let port = config.port;
-    let state = AppState {
-        db: pool,
+    let state = Arc::new(AppState {
+        pool,
         config: Arc::new(config),
-    };
+    });
 
     // ── 步骤五：配置 Axum 路由并启动服务器 ──────────────────────────────────
-    // 暂时用一个健康检查路由占位，后续会替换为 api_router 模块
-    let app = axum::Router::new()
-        .route("/health", axum::routing::get(|| async { "OK" }))
-        .with_state(state);
+    let app = handler::init_router(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("🚀 Server listening on http://{}", addr);

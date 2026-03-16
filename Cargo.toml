@@ -18,7 +18,7 @@ sqlx = { version = "0.8", features = [
     "chrono",
     "uuid",
     "macros",
-    "migrate"
+    "migrate",
 ] }
 
 # 数据校验
@@ -36,8 +36,20 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
-# 环境变量与实用工具
+# 环境变量
 dotenvy = "0.15"
+
+# 时间
 chrono = { version = "0.4", features = ["serde"] }
+
+# 唯一标识
 uuid = { version = "1", features = ["v4", "serde"] }
-jsonwebtoken = { version = "10", default-features = false, features = ["rust_crypto"] }
+
+# JWT
+jsonwebtoken = { version = "10", default-features = false, features = [
+    "rust_crypto",
+] }
+
+# 密码加密
+argon2 = "0.5.3"
+password-hash = "0.6.0"

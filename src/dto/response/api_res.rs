@@ -38,7 +38,7 @@ impl<T: Serialize> ApiResponse<T> {
     ///
     /// 用法示例：
     /// ```rust
-    /// ApiResponse::success(user_profile)  // data = Some(user_profile)
+    /// ApiResponse::success(user)  // data = Some(user)
     /// ```
     pub fn success(data: T) -> Self {
         Self {
