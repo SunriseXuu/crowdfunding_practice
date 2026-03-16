@@ -10,9 +10,10 @@
 
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use serde_json::json;
 use thiserror::Error;
 use tracing::error;
+
+use crate::dto::ApiResponse;
 
 /// `AppError` 是整个应用唯一的错误类型。
 ///
@@ -86,13 +87,8 @@ impl IntoResponse for AppError {
         // 在服务端日志中记录错误详情（前端看不到，方便我们排查问题）
         error!("AppError occurred: {}", &self);
 
-        // 构造统一的 JSON 响应体
-        let body = json!({
-            "code": business_code,
-            "success": false,
-            "data": null,
-            "msg": self.to_string(),
-        });
+        // 使用 ApiResponse 结构体构造错误响应
+        let body = ApiResponse::error(business_code, self.to_string());
 
         (http_status, axum::Json(body)).into_response()
     }
