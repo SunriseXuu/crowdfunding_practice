@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 # Web 框架
 axum = "0.8"
+axum-extra = { version = "0.12.5", features = ["typed-header"] }
 
 # 异步运行时
 tokio = { version = "1", features = ["full"] }

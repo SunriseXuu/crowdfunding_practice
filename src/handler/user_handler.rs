@@ -5,8 +5,8 @@ use crate::AppState;
 use crate::dto::ApiResponse;
 use crate::dto::request::{ChangePasswordReq, LoginReq, RegisterReq, UpdateUserReq};
 use crate::error::AppError;
+use crate::extractor::ValidatedJson;
 use crate::service::UserService;
-use crate::util::ValidatedJson;
 
 /// 用户注册接口
 pub async fn register(

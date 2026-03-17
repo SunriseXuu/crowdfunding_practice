@@ -1,6 +1,7 @@
 mod config;
 mod dto;
 mod error;
+mod extractor;
 mod handler;
 mod model;
 mod repository;
@@ -11,6 +12,7 @@ use config::AppConfig;
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -60,7 +62,7 @@ async fn main() {
     });
 
     // ── 步骤五：配置 Axum 路由并启动服务器 ──────────────────────────────────
-    let app = handler::init_router(state);
+    let app = handler::init_router(state).layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("🚀 Server listening on http://{}", addr);
