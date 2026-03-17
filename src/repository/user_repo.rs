@@ -79,20 +79,20 @@ impl UserRepo {
     }
 
     /// 更新密码哈希
-    pub async fn update_password(pool: &PgPool, id: Uuid, password_hash: &str) -> Result<User> {
-        sqlx::query_as!(
-            User,
+    pub async fn update_password(pool: &PgPool, id: Uuid, password_hash: &str) -> Result<u64> {
+        let result = sqlx::query!(
             r#"
                 UPDATE users
                 SET password_hash = $2
                 WHERE id = $1 AND is_active = true
-                RETURNING id, email, password_hash, username, is_active, created_at, updated_at
             "#,
             id,
             password_hash
         )
-        .fetch_one(pool)
-        .await
+        .execute(pool)
+        .await?;
+
+        Ok(result.rows_affected())
     }
 
     /// 软删除：将 is_active 设为 false

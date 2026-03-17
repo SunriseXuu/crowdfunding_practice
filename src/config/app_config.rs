@@ -7,7 +7,8 @@ use std::env;
 pub struct AppConfig {
     pub database_url: String,
     pub port: u16,
-    pub jwt_secret: String,
+    pub jwt_access_secret: String,
+    pub jwt_refresh_secret: String,
 }
 
 impl AppConfig {
@@ -27,14 +28,18 @@ impl AppConfig {
             .parse::<u16>()
             .expect("🚨 FATAL: PORT must be a valid number");
 
-        // JWT_SECRET 在 .env 中必须显式设定，绝不允许使用 default 值跑生产环境
-        let jwt_secret = env::var("JWT_SECRET")
-            .expect("🚨 FATAL: JWT_SECRET must be set in .env or system environment");
+        // JWT Secret 强制分离：Access 和 Refresh 使用不同密钥，提升安全性
+        let jwt_access_secret = env::var("JWT_ACCESS_SECRET")
+            .expect("🚨 FATAL: JWT_ACCESS_SECRET must be set in .env or system environment");
+
+        let jwt_refresh_secret = env::var("JWT_REFRESH_SECRET")
+            .expect("🚨 FATAL: JWT_REFRESH_SECRET must be set in .env or system environment");
 
         Self {
             database_url,
             port,
-            jwt_secret,
+            jwt_access_secret,
+            jwt_refresh_secret,
         }
     }
 }
