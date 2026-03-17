@@ -14,7 +14,6 @@ use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
-use tracing::info;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 /// AppState 是整个应用的"全局共享上下文"。
@@ -41,7 +40,7 @@ async fn main() {
 
     // ── 步骤二：加载应用配置 ─────────────────────────────────────────────────
     let config = AppConfig::init();
-    info!("✅ App Config Loaded!");
+    tracing::info!("✅ App Config Loaded!");
 
     // ── 步骤三：建立 SQLx 数据库连接池 ──────────────────────────────────────
     // PgPool 是一个连接池（Connection Pool）。
@@ -53,7 +52,7 @@ async fn main() {
         .await
         .expect("🚨 FATAL: Cannot connect to the database. Is Docker Postgres running?");
 
-    info!("✅ Database connected!");
+    tracing::info!("✅ Database connected!");
 
     // ── 步骤四：组装全局 AppState ────────────────────────────────────────────
     let port = config.port;
@@ -66,7 +65,7 @@ async fn main() {
     let app = router::init_router(state).layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
-    info!("🚀 Server listening on http://{}", addr);
+    tracing::info!("🚀 Server listening on http://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr)
         .await

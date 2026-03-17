@@ -11,7 +11,6 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use thiserror::Error;
-use tracing::error;
 
 use crate::dto::ApiResponse;
 
@@ -85,7 +84,7 @@ impl IntoResponse for AppError {
         };
 
         // 在服务端日志中记录错误详情（前端看不到，方便我们排查问题）
-        error!("AppError occurred: {}", &self);
+        tracing::error!("AppError occurred: {}", &self);
 
         // 使用 ApiResponse 结构体构造错误响应
         let body = ApiResponse::error(business_code, self.to_string());
@@ -102,7 +101,7 @@ impl From<sqlx::Error> for AppError {
     fn from(err: sqlx::Error) -> Self {
         // 这里故意不把 sqlx 的原始错误信息返回给前端（防止 SQL 泄漏）
         // 但在服务端日志里完整记录，方便排查
-        error!("Database error: {:?}", err);
+        tracing::error!("Database error: {:?}", err);
         AppError::Internal("数据库操作异常，请稍后重试".to_string())
     }
 }
@@ -120,7 +119,7 @@ impl From<validator::ValidationErrors> for AppError {
 /// 当鉴权中间件解析 Token 失败时，`?` 会自动触发这个转换。
 impl From<jsonwebtoken::errors::Error> for AppError {
     fn from(err: jsonwebtoken::errors::Error) -> Self {
-        error!("JWT error: {:?}", err);
+        tracing::error!("JWT error: {:?}", err);
         AppError::Unauthorized("Token 无效或已过期，请重新登录".to_string())
     }
 }

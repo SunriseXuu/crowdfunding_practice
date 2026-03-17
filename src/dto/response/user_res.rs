@@ -4,6 +4,20 @@ use uuid::Uuid;
 
 use crate::model::User;
 
+/// 登录成功附带的 Token 凭证
+#[derive(Debug, Serialize)]
+pub struct AuthTokens {
+    pub access_token: String,
+    pub refresh_token: String,
+}
+
+/// 登录成功响应体
+#[derive(Debug, Serialize)]
+pub struct LoginRes {
+    pub user: UserRes,
+    pub tokens: AuthTokens,
+}
+
 /// 用户信息响应体
 #[derive(Debug, Serialize)]
 pub struct UserRes {
