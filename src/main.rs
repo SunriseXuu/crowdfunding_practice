@@ -5,6 +5,7 @@ mod extractor;
 mod handler;
 mod model;
 mod repository;
+mod router;
 mod service;
 mod util;
 
@@ -62,7 +63,7 @@ async fn main() {
     });
 
     // ── 步骤五：配置 Axum 路由并启动服务器 ──────────────────────────────────
-    let app = handler::init_router(state).layer(TraceLayer::new_for_http());
+    let app = router::init_router(state).layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("🚀 Server listening on http://{}", addr);
