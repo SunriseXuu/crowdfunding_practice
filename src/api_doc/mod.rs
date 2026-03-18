@@ -1,0 +1,65 @@
+//! 本文件的核心职责是挂载所有的 Swagger UI 纯壳函数定义
+
+#![allow(dead_code)]
+
+pub mod auth_api_doc;
+pub mod user_api_doc;
+
+use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
+use utoipa::{Modify, OpenApi};
+
+use crate::dto::request::*;
+use crate::dto::response::{api_res::NoData, *};
+use crate::model::Gender;
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        auth_api_doc::register,
+        auth_api_doc::login,
+        user_api_doc::get_me,
+        user_api_doc::update,
+        user_api_doc::update_password,
+        user_api_doc::soft_delete,
+    ),
+    components(
+        schemas(
+            ApiResponse<NoData>,
+            ApiResponse<LoginRes>,
+            ApiResponse<UserRes>,
+            AuthTokens,
+            Gender,
+            LoginReq,
+            LoginRes,
+            NoData,
+            RegisterReq,
+            UpdatePasswordReq,
+            UpdateUserReq,
+            UserRes,
+        )
+    ),
+    modifiers(&SecurityAddon),
+    tags(
+        (name = "Auth", description = "认证模块接口"),
+        (name = "User", description = "用户管理接口"),
+    )
+)]
+pub struct ApiDoc;
+
+pub struct SecurityAddon;
+
+impl Modify for SecurityAddon {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        if let Some(components) = openapi.components.as_mut() {
+            components.add_security_scheme(
+                "jwt",
+                SecurityScheme::Http(
+                    HttpBuilder::new()
+                        .scheme(HttpAuthScheme::Bearer)
+                        .bearer_format("JWT")
+                        .build(),
+                ),
+            )
+        }
+    }
+}

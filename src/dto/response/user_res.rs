@@ -1,11 +1,12 @@
 use chrono::{DateTime, Utc};
 use serde::Serialize;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::model::{Gender, User};
 
 /// 用户信息响应体
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct UserRes {
     pub id: Uuid,
     pub email: String,

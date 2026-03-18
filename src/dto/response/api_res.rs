@@ -16,12 +16,17 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
+use utoipa::ToSchema;
+
+/// 空数据实体（完美映射 data: null）
+#[derive(Debug, Serialize, ToSchema)]
+pub struct NoData;
 
 /// 统一 API 响应结构体
 ///
 /// 泛型参数 `T` 表示 `data` 字段的类型。
 /// `T: Serialize` 约束确保 data 能被序列化成 JSON（类似 TS 里的 `T extends Serializable`）。
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ApiResponse<T: Serialize> {
     /// 业务状态码（200 = 成功，其他由 AppError 决定）
     pub code: i32,
@@ -50,7 +55,7 @@ impl<T: Serialize> ApiResponse<T> {
     }
 }
 
-impl ApiResponse<()> {
+impl ApiResponse<NoData> {
     /// 成功但不需要返回数据的工厂方法
     ///
     /// 用法示例（如删除操作）：

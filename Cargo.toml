@@ -54,3 +54,7 @@ jsonwebtoken = { version = "10", default-features = false, features = [
 # 密码加密
 argon2 = "0.5.3"
 password-hash = "0.6.0"
+
+# API 文档
+utoipa = { version = "5.4.0", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }

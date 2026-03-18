@@ -1,10 +1,11 @@
 use serde::Deserialize;
+use utoipa::ToSchema;
 use validator::Validate;
 
 use crate::model::Gender;
 
 /// 更新用户信息请求体
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct UpdateUserReq {
     /// 可选的用户名更新
     #[validate(length(min = 2, max = 50, message = "用户名长度需在2-50位之间"))]
@@ -19,7 +20,7 @@ pub struct UpdateUserReq {
 }
 
 /// 修改密码请求体
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct UpdatePasswordReq {
     /// 旧密码（不需校验长度，直接传给后端比对）
     pub old_password: String,

@@ -1,10 +1,11 @@
 use serde::Deserialize;
+use utoipa::ToSchema;
 use validator::Validate;
 
 use crate::model::Gender;
 
 /// 注册请求体
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct RegisterReq {
     /// 邮箱
     #[validate(email(message = "邮箱格式不正确"))]
@@ -27,7 +28,7 @@ pub struct RegisterReq {
 }
 
 /// 登录请求体
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct LoginReq {
     /// 邮箱
     #[validate(email(message = "邮箱格式不正确"))]

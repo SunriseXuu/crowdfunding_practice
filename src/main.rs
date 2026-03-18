@@ -1,3 +1,4 @@
+mod api_doc;
 mod config;
 mod dto;
 mod error;
@@ -15,6 +16,8 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 /// AppState 是整个应用的"全局共享上下文"。
 ///
@@ -62,7 +65,11 @@ async fn main() {
     });
 
     // ── 步骤五：配置 Axum 路由并启动服务器 ──────────────────────────────────
-    let app = router::init_router(state).layer(TraceLayer::new_for_http());
+    let app = router::init_router(state)
+        .merge(
+            SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api_doc::ApiDoc::openapi()),
+        )
+        .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!("🚀 Server listening on http://{}", addr);

@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Type};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Type, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Clone, Type, PartialEq, Eq, ToSchema)]
 #[sqlx(type_name = "gender_enum")] // 绑定 Postgres 中对应的枚举名称
 pub enum Gender {
     M,
