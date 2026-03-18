@@ -153,18 +153,48 @@ JWT_REFRESH_SECRET=your_super_secret_refresh_key_for_7_days
 ```
 
 ### 3. 启动数据库与数据迁移
-确保你的 Postgres 已经通过 docker-compose 跑起来了：
+确保你的 Postgres 已经跑起来了。本项目使用严格的 Migration (迁移) 机制来管理表结构：
+
+**创建与执行迁移：**
 ```bash
-# 自动创建必要的数据表
+# 1. 生成一个新的时间戳迁移文件 (不要修改历史文件！)
+sqlx migrate add <description_name>
+
+# 2. 将 migrations/ 下未执行的 SQL 脚本按顺序推送到真实数据库中
 sqlx migrate run
 ```
 
-### 4. 运行项目
-最快启动：
+**更新离线宏检查字典：**
+为了让 CI/CD 能够在没有真实数据库连接的情况下通过编译，并在 IDE 中消除假报错，每次修改完相关的 `query!` 查询后，一定要执行：
+```bash
+# 生成或更新 .sqlx/ 离线元数据目录
+cargo sqlx prepare
+```
+
+> **💡 高级技巧：处理 Postgres 自定义类型的类型覆盖 (Type Override)**  
+> 当我们在 Postgres 中创建了自定义的类型（如 `CREATE TYPE gender_enum AS ENUM (...)`），Rust 强类型的 `query_as!` 宏在编译阶段无法自动推算它的内存布局（因其不在宏的内置通用字典里）。
+> 因此我们需要使用 `sqlx` 提供的**运行时免检通行证 (Type Override)** 语法：
+> 1. 在 Rust 参数传递时：写 `gender as _`
+> 2. 在 SQL RETURNING/SELECT 时：写 `gender as "gender: _"`
+> 然后在接收的 Model 侧为其标记 `#[derive(sqlx::Type)]`，Rust 就会彻底接管类型的强约束！
+
+### 4. 运行与编译说明
+
+**1. 语法检查 (cargo check)**
+如果你只是想检查代码有没有拼写错误、类型匹配错误，而不想花费时间去生成最终的二进制可执行文件，请使用：
+```bash
+cargo check
+```
+它只会运行编译器前端，速度极快，是 Rust 开发者最常用的日常命令。
+
+**2. 最快启动项目 (cargo run)**
+编译并直接运行当前项目：
 ```bash
 cargo run
 ```
-如果你在编写自动化脚本，或想彻底看到所有因为宏替换而导致的 `stderr` 管道内容，可使用：
+
+**3. 查看完整宏报错日志**
+如果你在编写带 `sqlx` 宏的自动化脚本，或想彻底看到所有因为宏替换而导致的 `stderr` 管道内容，可使用：
 ```bash
 cargo build 2>&1 || true
 ```
