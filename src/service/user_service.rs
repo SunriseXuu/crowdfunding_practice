@@ -34,7 +34,15 @@ impl UserService {
             .to_string();
 
         // 3. 调用 Repository 存入数据库
-        let user = UserRepo::create(pool, &req.email, &password_hash, &req.username).await?;
+        let user = UserRepo::create(
+            pool,
+            &req.email,
+            &password_hash,
+            &req.username,
+            req.age,
+            req.gender,
+        )
+        .await?;
 
         Ok(UserRes::from(user))
     }
@@ -62,16 +70,16 @@ impl UserService {
         user_id: Uuid,
         req: UpdateUserReq,
     ) -> Result<UserRes, AppError> {
-        // 如果传了用户名，更新用户名
-        if let Some(username) = req.username {
-            let user = UserRepo::update(pool, user_id, &username).await?;
-            Ok(UserRes::from(user))
-        }
-        // 如果没传数据，查询当前信息返回
-        else {
+        // 如果没有传数据，查询当前信息返回
+        if req.username.is_none() && req.age.is_none() && req.gender.is_none() {
             let user = UserRepo::find_by_id(pool, user_id)
                 .await?
                 .ok_or_else(|| AppError::NotFound("用户不存在".to_string()))?;
+            Ok(UserRes::from(user))
+        }
+        // 如果有传数据，更新数据库
+        else {
+            let user = UserRepo::update(pool, user_id, req.username, req.age, req.gender).await?;
             Ok(UserRes::from(user))
         }
     }

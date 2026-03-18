@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::model::User;
+use crate::model::{Gender, User};
 
 /// 登录成功附带的 Token 凭证
 #[derive(Debug, Serialize)]
@@ -24,6 +24,8 @@ pub struct UserRes {
     pub id: Uuid,
     pub email: String,
     pub username: String,
+    pub age: Option<i32>,
+    pub gender: Option<Gender>,
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -38,6 +40,8 @@ impl From<User> for UserRes {
             id: user.id,
             email: user.email,
             username: user.username,
+            age: user.age,
+            gender: user.gender,
             is_active: user.is_active,
             created_at: user.created_at,
             updated_at: user.updated_at,

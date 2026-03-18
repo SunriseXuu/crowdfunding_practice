@@ -1,0 +1,81 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT id, email, password_hash, username, age, gender as \"gender: _\", is_active, created_at, updated_at\n                FROM users\n                WHERE email = $1 AND is_active = true\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "password_hash",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "age",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "gender: _",
+        "type_info": {
+          "Custom": {
+            "name": "gender_enum",
+            "kind": {
+              "Enum": [
+                "M",
+                "F",
+                "O"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "274e3a2e5df030dcaaa26cbe435437cfdc0687f6772b395ff4cbf5128ad0647d"
+}

@@ -1,0 +1,95 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE users\n                SET \n                    username = COALESCE($2::VARCHAR, username),\n                    age = COALESCE($3::INT, age),\n                    gender = COALESCE($4::gender_enum, gender)\n                WHERE id = $1 AND is_active = true\n                RETURNING id, email, password_hash, username, age, gender as \"gender: _\", is_active, created_at, updated_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "password_hash",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "age",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "gender: _",
+        "type_info": {
+          "Custom": {
+            "name": "gender_enum",
+            "kind": {
+              "Enum": [
+                "M",
+                "F",
+                "O"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Int4",
+        {
+          "Custom": {
+            "name": "gender_enum",
+            "kind": {
+              "Enum": [
+                "M",
+                "F",
+                "O"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "95baa39acb8d7ea0b2a8ea7a36982d9cdcfbe3d6e96d8c8229451db8fce09647"
+}

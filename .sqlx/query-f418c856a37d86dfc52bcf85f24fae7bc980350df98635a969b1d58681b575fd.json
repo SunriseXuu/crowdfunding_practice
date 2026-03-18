@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE users\n                SET is_active = false\n                WHERE id = $1 AND is_active = true\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f418c856a37d86dfc52bcf85f24fae7bc980350df98635a969b1d58681b575fd"
+}

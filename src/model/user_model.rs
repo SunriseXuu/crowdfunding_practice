@@ -1,7 +1,15 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use sqlx::{FromRow, Type};
 use uuid::Uuid;
+
+#[derive(Debug, Serialize, Deserialize, Clone, Type, PartialEq, Eq)]
+#[sqlx(type_name = "gender_enum")] // 绑定 Postgres 中对应的枚举名称
+pub enum Gender {
+    M,
+    F,
+    O,
+}
 
 /// User 数据库模型
 ///
@@ -17,6 +25,10 @@ pub struct User {
     pub password_hash: String,
     /// 用户昵称
     pub username: String,
+    /// 年龄
+    pub age: Option<i32>,
+    /// 性别
+    pub gender: Option<Gender>,
     /// 是否有效（用于软删除，true 为有效，false 为已注销）
     pub is_active: bool,
     /// 注册时间

@@ -1,6 +1,7 @@
-use crate::model::User;
 use sqlx::{PgPool, Result};
 use uuid::Uuid;
+
+use crate::model::{Gender, User};
 
 /// 用户仓库层 (Repository)
 ///
@@ -15,17 +16,21 @@ impl UserRepo {
         email: &str,
         password_hash: &str,
         username: &str,
+        age: Option<i32>,
+        gender: Option<Gender>,
     ) -> Result<User> {
         sqlx::query_as!(
             User,
             r#"
-                INSERT INTO users (email, password_hash, username)
-                VALUES ($1, $2, $3)
-                RETURNING id, email, password_hash, username, is_active, created_at, updated_at
+                INSERT INTO users (email, password_hash, username, age, gender)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id, email, password_hash, username, age, gender as "gender: _", is_active, created_at, updated_at
             "#,
             email,
             password_hash,
-            username
+            username,
+            age,
+            gender as _
         )
         .fetch_one(pool)
         .await
@@ -36,7 +41,7 @@ impl UserRepo {
         sqlx::query_as!(
             User,
             r#"
-                SELECT id, email, password_hash, username, is_active, created_at, updated_at
+                SELECT id, email, password_hash, username, age, gender as "gender: _", is_active, created_at, updated_at
                 FROM users
                 WHERE id = $1 AND is_active = true
             "#,
@@ -51,7 +56,7 @@ impl UserRepo {
         sqlx::query_as!(
             User,
             r#"
-                SELECT id, email, password_hash, username, is_active, created_at, updated_at
+                SELECT id, email, password_hash, username, age, gender as "gender: _", is_active, created_at, updated_at
                 FROM users
                 WHERE email = $1 AND is_active = true
             "#,
@@ -61,18 +66,29 @@ impl UserRepo {
         .await
     }
 
-    /// 更新用户名
-    pub async fn update(pool: &PgPool, id: Uuid, username: &str) -> Result<User> {
+    /// 更新用户信息（支持局部更新）
+    pub async fn update(
+        pool: &PgPool,
+        id: Uuid,
+        username: Option<String>,
+        age: Option<i32>,
+        gender: Option<Gender>,
+    ) -> Result<User> {
         sqlx::query_as!(
             User,
             r#"
                 UPDATE users
-                SET username = $2
+                SET 
+                    username = COALESCE($2::VARCHAR, username),
+                    age = COALESCE($3::INT, age),
+                    gender = COALESCE($4::gender_enum, gender)
                 WHERE id = $1 AND is_active = true
-                RETURNING id, email, password_hash, username, is_active, created_at, updated_at
+                RETURNING id, email, password_hash, username, age, gender as "gender: _", is_active, created_at, updated_at
             "#,
             id,
-            username
+            username,
+            age,
+            gender as _
         )
         .fetch_one(pool)
         .await

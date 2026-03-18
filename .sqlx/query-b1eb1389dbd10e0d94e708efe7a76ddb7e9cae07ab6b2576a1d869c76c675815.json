@@ -1,0 +1,96 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO users (email, password_hash, username, age, gender)\n                VALUES ($1, $2, $3, $4, $5)\n                RETURNING id, email, password_hash, username, age, gender as \"gender: _\", is_active, created_at, updated_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "password_hash",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "age",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "gender: _",
+        "type_info": {
+          "Custom": {
+            "name": "gender_enum",
+            "kind": {
+              "Enum": [
+                "M",
+                "F",
+                "O"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        {
+          "Custom": {
+            "name": "gender_enum",
+            "kind": {
+              "Enum": [
+                "M",
+                "F",
+                "O"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b1eb1389dbd10e0d94e708efe7a76ddb7e9cae07ab6b2576a1d869c76c675815"
+}
