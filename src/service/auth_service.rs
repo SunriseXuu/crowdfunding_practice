@@ -17,7 +17,7 @@ use crate::repository::UserRepo;
 pub struct AuthService;
 
 impl AuthService {
-    /// 注册用户
+    /// 注册用户业务
     pub async fn register(pool: &PgPool, req: RegisterReq) -> Result<UserRes, AppError> {
         // 1. 检查邮箱是否已存在 (业务逻辑判断，非技术错误)
         if UserRepo::find_by_email(pool, &req.email).await?.is_some() {
@@ -45,7 +45,7 @@ impl AuthService {
         Ok(UserRes::from(user))
     }
 
-    /// 登录用户
+    /// 登录用户业务
     pub async fn login(pool: &PgPool, req: LoginReq) -> Result<UserRes, AppError> {
         // 1. 按邮箱查找用户
         let user = UserRepo::find_by_email(pool, &req.email)

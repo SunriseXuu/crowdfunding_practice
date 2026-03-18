@@ -19,15 +19,15 @@ use crate::repository::UserRepo;
 pub struct UserService;
 
 impl UserService {
-    /// 获取当前用户信息
-    pub async fn get_me(pool: &PgPool, user_id: Uuid) -> Result<UserRes, AppError> {
+    /// 获取一个用户信息业务
+    pub async fn retrieve(pool: &PgPool, user_id: Uuid) -> Result<UserRes, AppError> {
         let user = UserRepo::find_by_id(pool, user_id)
             .await?
             .ok_or_else(|| AppError::NotFound("用户不存在或已被删除".to_string()))?;
         Ok(UserRes::from(user))
     }
 
-    /// 更新用户信息
+    /// 更新用户信息业务
     pub async fn update(
         pool: &PgPool,
         user_id: Uuid,
@@ -47,7 +47,7 @@ impl UserService {
         }
     }
 
-    /// 修改用户密码
+    /// 修改用户密码业务
     pub async fn update_password(
         pool: &PgPool,
         user_id: Uuid,
@@ -79,7 +79,7 @@ impl UserService {
         Ok(())
     }
 
-    /// 软删除用户
+    /// 软删除用户业务
     pub async fn soft_delete(pool: &PgPool, user_id: Uuid) -> Result<(), AppError> {
         let affected = UserRepo::soft_delete(pool, user_id).await?;
         if affected == 0 {

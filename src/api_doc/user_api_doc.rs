@@ -10,7 +10,7 @@ use super::*;
     security(("jwt" = [])),
     tag = "User"
 )]
-pub fn get_me() {}
+pub fn retrieve_current_user() {}
 
 #[utoipa::path(
     put,
@@ -22,7 +22,7 @@ pub fn get_me() {}
     security(("jwt" = [])),
     tag = "User"
 )]
-pub fn update() {}
+pub fn update_current_user() {}
 
 #[utoipa::path(
     patch,
@@ -34,7 +34,7 @@ pub fn update() {}
     security(("jwt" = [])),
     tag = "User"
 )]
-pub fn update_password() {}
+pub fn update_current_user_password() {}
 
 #[utoipa::path(
     delete,
@@ -45,4 +45,4 @@ pub fn update_password() {}
     security(("jwt" = [])),
     tag = "User"
 )]
-pub fn soft_delete() {}
+pub fn soft_delete_user() {}

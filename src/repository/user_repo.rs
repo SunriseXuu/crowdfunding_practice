@@ -10,7 +10,7 @@ use crate::model::{Gender, User};
 pub struct UserRepo;
 
 impl UserRepo {
-    /// 插入一个新用户
+    /// 插入一个新用户数据库操作
     pub async fn create(
         pool: &PgPool,
         email: &str,
@@ -36,7 +36,7 @@ impl UserRepo {
         .await
     }
 
-    /// 通过 ID 查找活跃用户
+    /// 通过 ID 查找一个活跃用户数据库操作
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<User>> {
         sqlx::query_as!(
             User,
@@ -51,7 +51,7 @@ impl UserRepo {
         .await
     }
 
-    /// 通过邮箱查找活跃用户
+    /// 通过邮箱查找一个活跃用户数据库操作
     pub async fn find_by_email(pool: &PgPool, email: &str) -> Result<Option<User>> {
         sqlx::query_as!(
             User,
@@ -66,7 +66,7 @@ impl UserRepo {
         .await
     }
 
-    /// 更新用户信息（支持局部更新）
+    /// 更新一个用户的信息（支持局部更新）数据库操作
     pub async fn update(
         pool: &PgPool,
         id: Uuid,
@@ -94,7 +94,7 @@ impl UserRepo {
         .await
     }
 
-    /// 更新密码哈希
+    /// 更新一个用户的密码哈希数据库操作
     pub async fn update_password(pool: &PgPool, id: Uuid, password_hash: &str) -> Result<u64> {
         let result = sqlx::query!(
             r#"
@@ -111,7 +111,7 @@ impl UserRepo {
         Ok(result.rows_affected())
     }
 
-    /// 软删除：将 is_active 设为 false
+    /// 软删除一个用户数据库操作：将 is_active 设为 false
     pub async fn soft_delete(pool: &PgPool, id: Uuid) -> Result<u64> {
         let result = sqlx::query!(
             r#"

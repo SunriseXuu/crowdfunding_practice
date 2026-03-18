@@ -8,16 +8,16 @@ use crate::error::AppError;
 use crate::extractor::{AuthenticatedUser, ValidatedJson};
 use crate::service::UserService;
 
-/// 获取当前用户信息接口
-pub async fn get_me(
+/// 当前用户获取自己的信息接口
+pub async fn retrieve(
     State(state): State<Arc<AppState>>,
     AuthenticatedUser(user_id): AuthenticatedUser,
 ) -> Result<impl IntoResponse, AppError> {
-    let user_res = UserService::get_me(&state.pool, user_id).await?;
+    let user_res = UserService::retrieve(&state.pool, user_id).await?;
     Ok(ApiResponse::success(user_res))
 }
 
-/// 更新用户信息接口
+/// 当前用户更新自己的信息接口
 pub async fn update(
     State(state): State<Arc<AppState>>,
     AuthenticatedUser(user_id): AuthenticatedUser,
@@ -27,7 +27,7 @@ pub async fn update(
     Ok(ApiResponse::success(user_res))
 }
 
-/// 修改密码接口
+/// 当前用户修改密码接口
 pub async fn update_password(
     State(state): State<Arc<AppState>>,
     AuthenticatedUser(user_id): AuthenticatedUser,
@@ -37,7 +37,7 @@ pub async fn update_password(
     Ok(ApiResponse::success_without_data())
 }
 
-/// 软删除账号接口
+/// 管理员软删除账号接口
 pub async fn soft_delete(
     State(state): State<Arc<AppState>>,
     AuthenticatedUser(user_id): AuthenticatedUser,

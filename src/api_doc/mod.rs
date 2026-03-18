@@ -15,12 +15,12 @@ use crate::model::Gender;
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        auth_api_doc::register,
-        auth_api_doc::login,
-        user_api_doc::get_me,
-        user_api_doc::update,
-        user_api_doc::update_password,
-        user_api_doc::soft_delete,
+        auth_api_doc::register_user,
+        auth_api_doc::login_user,
+        user_api_doc::retrieve_current_user,
+        user_api_doc::update_current_user,
+        user_api_doc::update_current_user_password,
+        user_api_doc::soft_delete_user,
     ),
     components(
         schemas(

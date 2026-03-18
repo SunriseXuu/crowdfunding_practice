@@ -9,7 +9,7 @@ use super::*;
     ),
     tag = "Auth"
 )]
-pub fn register() {}
+pub fn register_user() {}
 
 #[utoipa::path(
     post,
@@ -21,4 +21,4 @@ pub fn register() {}
     ),
     tag = "Auth"
 )]
-pub fn login() {}
+pub fn login_user() {}
