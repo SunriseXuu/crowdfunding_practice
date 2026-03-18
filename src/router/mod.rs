@@ -1,3 +1,4 @@
+pub mod auth_router;
 pub mod user_router;
 
 use axum::Router;
@@ -9,7 +10,10 @@ use crate::AppState;
 pub fn init_router(state: Arc<AppState>) -> Router {
     Router::new()
         .route("/health", axum::routing::get(|| async { "OK" }))
-        // 合并用户相关路由
-        .nest("/api/v1", user_router::routes())
+        // 挂载认证模块路由
+        .nest("/api/v1/auth", auth_router::routes())
+        // 挂载用户模块路由
+        .nest("/api/v1/users", user_router::routes())
+        // 挂载状态
         .with_state(state)
 }

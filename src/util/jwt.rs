@@ -13,10 +13,12 @@ use crate::error::AppError;
 pub struct Claims {
     /// 用户的唯一标识符
     pub sub: Uuid,
-    /// 过期时间 (Expiration Time)
-    pub exp: usize,
+    /// 签发人 (Issuer)
+    pub iss: String,
     /// 签发时间 (Issued At)
     pub iat: usize,
+    /// 过期时间 (Expiration Time)
+    pub exp: usize,
 }
 
 /// 签发 Token (Access 或 Refresh)
@@ -28,6 +30,7 @@ pub fn sign_token(user_id: Uuid, secret: &str, expiration: Duration) -> Result<S
 
     let claims = Claims {
         sub: user_id,
+        iss: "crowdfunding_practice".to_string(),
         iat: now.timestamp() as usize,
         exp: expire_at.timestamp() as usize,
     };

@@ -1,75 +1,47 @@
 use axum::{extract::State, response::IntoResponse};
-use chrono::Duration;
 use std::sync::Arc;
 
 use crate::AppState;
 use crate::dto::ApiResponse;
-use crate::dto::request::{ChangePasswordReq, LoginReq, RegisterReq, UpdateUserReq};
-use crate::dto::response::user_res::{AuthTokens, LoginRes};
+use crate::dto::request::{UpdatePasswordReq, UpdateUserReq};
 use crate::error::AppError;
-use crate::extractor::{AuthUser, ValidatedJson};
+use crate::extractor::{AuthenticatedUser, ValidatedJson};
 use crate::service::UserService;
-use crate::util::jwt;
 
-/// 用户注册接口
-pub async fn register(
+/// 获取当前用户信息接口
+pub async fn get_me(
     State(state): State<Arc<AppState>>,
-    ValidatedJson(req): ValidatedJson<RegisterReq>,
+    AuthenticatedUser(user_id): AuthenticatedUser,
 ) -> Result<impl IntoResponse, AppError> {
-    let user = UserService::register(&state.pool, req).await?;
-    Ok(ApiResponse::success(user))
-}
-
-/// 用户登录接口
-pub async fn login(
-    State(state): State<Arc<AppState>>,
-    ValidatedJson(req): ValidatedJson<LoginReq>,
-) -> Result<impl IntoResponse, AppError> {
-    let user = UserService::login(&state.pool, req).await?;
-
-    // 签发双 Token
-    let access_token = jwt::sign_token(
-        user.id,
-        &state.config.jwt_access_secret,
-        Duration::minutes(15),
-    )?;
-    let refresh_token =
-        jwt::sign_token(user.id, &state.config.jwt_refresh_secret, Duration::days(7))?;
-
-    Ok(ApiResponse::success(LoginRes {
-        user,
-        tokens: AuthTokens {
-            access_token,
-            refresh_token,
-        },
-    }))
+    let user_res = UserService::get_me(&state.pool, user_id).await?;
+    Ok(ApiResponse::success(user_res))
 }
 
 /// 更新用户信息接口
 pub async fn update(
     State(state): State<Arc<AppState>>,
-    user: AuthUser,
+    AuthenticatedUser(user_id): AuthenticatedUser,
     ValidatedJson(req): ValidatedJson<UpdateUserReq>,
 ) -> Result<impl IntoResponse, AppError> {
-    let user_res = UserService::update(&state.pool, user.user_id, req).await?;
+    let user_res = UserService::update(&state.pool, user_id, req).await?;
     Ok(ApiResponse::success(user_res))
 }
 
 /// 修改密码接口
 pub async fn update_password(
     State(state): State<Arc<AppState>>,
-    user: AuthUser,
-    ValidatedJson(req): ValidatedJson<ChangePasswordReq>,
+    AuthenticatedUser(user_id): AuthenticatedUser,
+    ValidatedJson(req): ValidatedJson<UpdatePasswordReq>,
 ) -> Result<impl IntoResponse, AppError> {
-    UserService::update_password(&state.pool, user.user_id, req).await?;
+    UserService::update_password(&state.pool, user_id, req).await?;
     Ok(ApiResponse::success_without_data())
 }
 
 /// 软删除账号接口
 pub async fn soft_delete(
     State(state): State<Arc<AppState>>,
-    user: AuthUser,
+    AuthenticatedUser(user_id): AuthenticatedUser,
 ) -> Result<impl IntoResponse, AppError> {
-    UserService::soft_delete(&state.pool, user.user_id).await?;
+    UserService::soft_delete(&state.pool, user_id).await?;
     Ok(ApiResponse::success_without_data())
 }

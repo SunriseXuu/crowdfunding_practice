@@ -14,13 +14,11 @@ use crate::{AppState, error::AppError, util::jwt::verify_token};
 
 /// JWT 鉴权提取器 (Extractor)
 ///
-/// 任何需要登录才能访问的接口，只需要在参数列表中加上 `user: AuthUser` 即可。
+/// 任何需要登录才能访问的接口，只需要在参数列表中加上 `AuthenticatedUser(user_id)` 即可。
 /// Axum 会在进入业务函数之前，自动执行这里的 `from_request_parts` 逻辑。
-pub struct AuthUser {
-    pub user_id: Uuid,
-}
+pub struct AuthenticatedUser(pub Uuid);
 
-impl<S> FromRequestParts<S> for AuthUser
+impl<S> FromRequestParts<S> for AuthenticatedUser
 where
     S: Send + Sync,
     Arc<AppState>: axum::extract::FromRef<S>,
@@ -45,9 +43,7 @@ where
         // 3. 验证 Token (这步调用了我们第一步写的纯函数)
         let claims = verify_token(bearer.token(), secret)?;
 
-        // 4. 验证通过，把解析出的用户 ID 包裹在 AuthUser 中传递给下游 Handler
-        Ok(AuthUser {
-            user_id: claims.sub,
-        })
+        // 4. 验证通过，把解析出的用户 ID 包裹在 AuthenticatedUser 中传递给下游 Handler
+        Ok(Self(claims.sub))
     }
 }

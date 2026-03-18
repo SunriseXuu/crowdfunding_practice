@@ -9,8 +9,8 @@
 //!
 //! 如果校验不通过，请求不会进入 Handler，直接返回 `AppError::BadRequest`。
 
-use axum::extract::rejection::JsonRejection;
 use axum::extract::FromRequest;
+use axum::extract::rejection::JsonRejection;
 use axum::http::Request;
 use serde::de::DeserializeOwned;
 use validator::Validate;
@@ -61,7 +61,10 @@ where
 {
     type Rejection = AppError;
 
-    async fn from_request(req: Request<axum::body::Body>, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request(
+        req: Request<axum::body::Body>,
+        state: &S,
+    ) -> Result<Self, Self::Rejection> {
         // 第一步：尝试从请求体中反序列化 JSON
         let json_result: Result<axum::Json<T>, JsonRejection> =
             axum::Json::from_request(req, state).await;
@@ -73,11 +76,14 @@ where
                 data.validate()?;
 
                 // 两步都通过，返回提取成功的数据
-                Ok(ValidatedJson(data))
+                Ok(Self(data))
             }
             Err(rejection) => {
                 // JSON 解析失败（如格式错误、字段缺失、类型不匹配等）
-                Err(AppError::BadRequest(format!("请求体解析失败: {}", rejection)))
+                Err(AppError::BadRequest(format!(
+                    "请求体解析失败: {}",
+                    rejection
+                )))
             }
         }
     }

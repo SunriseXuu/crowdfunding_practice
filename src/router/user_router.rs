@@ -1,17 +1,18 @@
 use axum::{
     Router,
-    routing::{delete, patch, post, put},
+    routing::{delete, get, patch, put},
 };
 use std::sync::Arc;
 
 use crate::{AppState, handler::user_handler};
 
 /// 用户模块子路由
+///
+/// 挂载路径: `/api/v1/users`
 pub fn routes() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/auth/register", post(user_handler::register))
-        .route("/auth/login", post(user_handler::login))
-        .route("/users", put(user_handler::update))
-        .route("/users/password", patch(user_handler::update_password))
-        .route("/users", delete(user_handler::soft_delete))
+        .route("/me", get(user_handler::get_me))
+        .route("/", put(user_handler::update))
+        .route("/password", patch(user_handler::update_password))
+        .route("/", delete(user_handler::soft_delete))
 }
