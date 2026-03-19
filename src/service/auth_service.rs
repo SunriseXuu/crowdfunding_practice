@@ -2,12 +2,15 @@ use argon2::{
     Argon2,
     password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng},
 };
+use chrono::Duration;
 use sqlx::PgPool;
 
+use crate::config::AppConfig;
 use crate::dto::request::{LoginReq, RegisterReq};
-use crate::dto::response::UserRes;
+use crate::dto::response::{AuthTokensRes, LoginRes, UserRes};
 use crate::error::AppError;
 use crate::repository::UserRepo;
+use crate::util::jwt;
 
 /// 认证业务逻辑层 (Auth Service)
 ///
@@ -46,7 +49,11 @@ impl AuthService {
     }
 
     /// 登录用户业务
-    pub async fn login(pool: &PgPool, req: LoginReq) -> Result<UserRes, AppError> {
+    pub async fn login(
+        pool: &PgPool,
+        config: &AppConfig,
+        req: LoginReq,
+    ) -> Result<LoginRes, AppError> {
         // 1. 按邮箱查找用户
         let user = UserRepo::find_by_email(pool, &req.email)
             .await?
@@ -59,16 +66,63 @@ impl AuthService {
             .verify_password(req.password.as_bytes(), &parsed_hash)
             .map_err(|_| AppError::Unauthorized("邮箱或密码不正确".to_string()))?;
 
-        Ok(UserRes::from(user))
+        // 3. 签发双 Token
+        let access_token = jwt::sign_token(
+            user.id,
+            user.role.clone(),
+            &config.jwt_access_secret,
+            Duration::minutes(15),
+        )?;
+        let refresh_token = jwt::sign_token(
+            user.id,
+            user.role.clone(),
+            &config.jwt_refresh_secret,
+            Duration::days(7),
+        )?;
+
+        Ok(LoginRes {
+            user: UserRes::from(user),
+            tokens: AuthTokensRes {
+                access_token,
+                refresh_token,
+            },
+        })
     }
 
     /// 刷新 Token 验证业务
     /// 用于确保持有合法 Refresh Token 的用户依然处于正常允许登录的状态
-    pub async fn refresh(pool: &PgPool, user_id: uuid::Uuid) -> Result<UserRes, AppError> {
-        let user = UserRepo::find_by_id(pool, user_id).await?.ok_or_else(|| {
-            AppError::Unauthorized("该账号已被注销或封禁，Token 失效".to_string())
-        })?;
+    pub async fn refresh(
+        pool: &PgPool,
+        config: &AppConfig,
+        refresh_token: &str,
+    ) -> Result<AuthTokensRes, AppError> {
+        // 1. 校验证明：拿着这把专属的长效钥匙（用 refresh_secret 解密）
+        let claims = jwt::verify_token(refresh_token, &config.jwt_refresh_secret)?;
 
-        Ok(UserRes::from(user))
+        // 2. 检查业务态：即便钥匙有效，账号还在吗？被封禁了吗？
+        let user = UserRepo::find_by_id(pool, claims.sub)
+            .await?
+            .ok_or_else(|| {
+                AppError::Unauthorized("该账号已被注销或封禁，Token 失效".to_string())
+            })?;
+
+        // 3. 签发新的双 Token
+        let access_token = jwt::sign_token(
+            user.id,
+            user.role.clone(),
+            &config.jwt_access_secret,
+            Duration::minutes(15),
+        )?;
+        let new_refresh_token = jwt::sign_token(
+            user.id,
+            user.role.clone(),
+            &config.jwt_refresh_secret,
+            Duration::days(7),
+        )?;
+
+        Ok(AuthTokensRes {
+            access_token,
+            refresh_token: new_refresh_token,
+        })
     }
 }

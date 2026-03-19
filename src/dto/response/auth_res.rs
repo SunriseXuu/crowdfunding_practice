@@ -5,7 +5,7 @@ use crate::dto::response::user_res::UserRes;
 
 /// 登录成功附带的 Token
 #[derive(Debug, Serialize, ToSchema)]
-pub struct AuthTokens {
+pub struct AuthTokensRes {
     pub access_token: String,
     pub refresh_token: String,
 }
@@ -14,5 +14,5 @@ pub struct AuthTokens {
 #[derive(Debug, Serialize, ToSchema)]
 pub struct LoginRes {
     pub user: UserRes,
-    pub tokens: AuthTokens,
+    pub tokens: AuthTokensRes,
 }

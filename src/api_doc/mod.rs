@@ -9,8 +9,8 @@ pub mod user_api_doc;
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::{Modify, OpenApi};
 
-use crate::dto::request::*;
 use crate::dto::request::auth_req::RefreshReq;
+use crate::dto::request::*;
 use crate::dto::response::{api_res::NoData, *};
 use crate::model::Gender;
 
@@ -31,7 +31,7 @@ use crate::model::Gender;
             ApiResponse<NoData>,
             ApiResponse<LoginRes>,
             ApiResponse<UserRes>,
-            AuthTokens,
+            AuthTokensRes,
             Gender,
             LoginReq,
             LoginRes,
