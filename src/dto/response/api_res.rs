@@ -47,7 +47,7 @@ impl<T: Serialize> ApiResponse<T> {
     /// ```
     pub fn success(data: T) -> Self {
         Self {
-            code: 200,
+            code: 20000,
             success: true,
             data: Some(data),
             msg: "ok".to_string(),
@@ -64,7 +64,7 @@ impl ApiResponse<NoData> {
     /// ```
     pub fn success_without_data() -> Self {
         Self {
-            code: 200,
+            code: 20000,
             success: true,
             data: None,
             msg: "ok".to_string(),

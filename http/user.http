@@ -1,0 +1,36 @@
+### 普通用户模块接口测试 (User Module)
+
+@base_url = http://localhost:8080/api/v1
+
+# 🚨 将下方的 Token 替换为您从 auth.http 登录后获得的真实 access_token
+@auth_token = Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3M2RhNTRkYy03Nzc1LTQ2NjktYjhjNS0yZTlhNjU4MWJhMjQiLCJyb2xlIjoiVXNlciIsImlzcyI6ImNyb3dkZnVuZGluZ19wcmFjdGljZSIsImlhdCI6MTc3MzkzNDExMSwiZXhwIjoxNzczOTM1MDExfQ.OUyyunMo18Vj0zj2WB8Dj20gFgDZFDdPm-_cBsDbUVk
+
+### 1. 获取自己的完整信息
+GET {{base_url}}/users/me
+Authorization: {{auth_token}}
+
+### 2. 更新个人可见资料 (支持局部更新)
+PUT {{base_url}}/users
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "username": "NewTestUser",
+    "age": 26
+    // "gender" 是可选的
+}
+
+### 3. 修改密码
+PATCH {{base_url}}/users/password
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "old_password": "password123",
+    "new_password": "newpassword456"
+}
+
+### 4. 彻底退网 (软删除自己)
+# 警告：执行此操作后，当前 Token 及账号将被注销！
+DELETE {{base_url}}/users/me
+Authorization: {{auth_token}}

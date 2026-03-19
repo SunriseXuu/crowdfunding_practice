@@ -1,0 +1,11 @@
+### 管理员专属大后台接口 (Admin RBAC)
+
+@base_url = http://localhost:8080/api/v1
+
+# 🚨 将下方的 Token 替换为您从 auth.http 登录的【管理员账号】access_token
+@admin_token = Bearer YOUR_ADMIN_TOKEN_HERE
+
+### 1. 强行封禁指定用户 (Ban User)
+# 请将 URL 最后的 UUID 替换为您要封禁的真正用户的 ID（可从数据库或列表获取）
+DELETE {{base_url}}/admin/users/123e4567-e89b-12d3-a456-426614174000
+Authorization: {{admin_token}}

@@ -74,7 +74,7 @@ pub enum AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         // 根据错误变体，映射到对应的 HTTP 状态码和业务 code
-        let (http_status, business_code) = match &self {
+        let (http_status, code) = match &self {
             AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, 40000),
             AppError::Unauthorized(_) => (StatusCode::UNAUTHORIZED, 40100),
             AppError::Forbidden(_) => (StatusCode::FORBIDDEN, 40300),
@@ -87,7 +87,7 @@ impl IntoResponse for AppError {
         tracing::error!("AppError occurred: {}", &self);
 
         // 使用 ApiResponse 结构体构造错误响应
-        let body = ApiResponse::error(business_code, self.to_string());
+        let body = ApiResponse::error(code, self.to_string());
 
         (http_status, axum::Json(body)).into_response()
     }

@@ -1,0 +1,29 @@
+### 认证模块接口测试 (Auth Module)
+
+@base_url = http://localhost:8080/api/v1
+
+### 1. 注册新用户
+# @name register
+POST {{base_url}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "user01@example.com",
+    "password": "password123",
+    "username": "TestUser01",
+    "age": 25,
+    "gender": "M"
+}
+
+### 2. 登录并提取 Token
+# @name login
+POST {{base_url}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "user01@example.com",
+    "password": "password123"
+}
+
+# 💡 小提示：登录成功后，您可以复制 response body 中的 access_token，
+# 粘贴到后续 user.http 和 admin.http 中的变量处！
