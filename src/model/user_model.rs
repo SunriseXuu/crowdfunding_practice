@@ -12,6 +12,13 @@ pub enum Gender {
     O,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, Type, PartialEq, Eq, ToSchema)]
+#[sqlx(type_name = "user_role", rename_all = "lowercase")] // 绑定 Postgres 枚举
+pub enum Role {
+    User,
+    Admin,
+}
+
 /// User 数据库模型
 ///
 /// 对应数据库中的 `users` 表。
@@ -30,8 +37,12 @@ pub struct User {
     pub age: Option<i32>,
     /// 性别
     pub gender: Option<Gender>,
-    /// 是否有效（用于软删除，true 为有效，false 为已注销）
-    pub is_active: bool,
+    /// 用户角色
+    pub role: Role,
+    /// 是否已自行注销账号（软删除）
+    pub is_deactivated: bool,
+    /// 是否已被管理员封禁（软删除）
+    pub is_banned: bool,
     /// 注册时间
     pub created_at: DateTime<Utc>,
     /// 最后一次更新时间

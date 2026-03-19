@@ -16,6 +16,7 @@ use crate::repository::UserRepo;
 /// - 查询信息
 /// - 密码修改
 /// - 更新信息
+/// - 注销账号
 pub struct UserService;
 
 impl UserService {
@@ -79,9 +80,9 @@ impl UserService {
         Ok(())
     }
 
-    /// 软删除用户业务
-    pub async fn soft_delete(pool: &PgPool, user_id: Uuid) -> Result<(), AppError> {
-        let affected = UserRepo::soft_delete(pool, user_id).await?;
+    /// 用户自行注销账号业务
+    pub async fn deactivate(pool: &PgPool, user_id: Uuid) -> Result<(), AppError> {
+        let affected = UserRepo::deactivate(pool, user_id).await?;
         if affected == 0 {
             return Err(AppError::NotFound("用户不存在或已被注销".to_string()));
         }

@@ -37,11 +37,11 @@ pub async fn update_password(
     Ok(ApiResponse::success_without_data())
 }
 
-/// 管理员软删除账号接口
-pub async fn soft_delete(
+/// 当前用户自己注销账号接口
+pub async fn deactivate(
     State(state): State<Arc<AppState>>,
     AuthenticatedUser(user_id): AuthenticatedUser,
 ) -> Result<impl IntoResponse, AppError> {
-    UserService::soft_delete(&state.pool, user_id).await?;
+    UserService::deactivate(&state.pool, user_id).await?;
     Ok(ApiResponse::success_without_data())
 }

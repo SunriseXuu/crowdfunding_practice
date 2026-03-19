@@ -2,6 +2,7 @@
 
 #![allow(dead_code)]
 
+pub mod admin_api_doc;
 pub mod auth_api_doc;
 pub mod user_api_doc;
 
@@ -20,7 +21,8 @@ use crate::model::Gender;
         user_api_doc::retrieve_current_user,
         user_api_doc::update_current_user,
         user_api_doc::update_current_user_password,
-        user_api_doc::soft_delete_user,
+        user_api_doc::deactivate_current_user,
+        admin_api_doc::ban_user,
     ),
     components(
         schemas(
@@ -41,7 +43,8 @@ use crate::model::Gender;
     modifiers(&SecurityAddon),
     tags(
         (name = "Auth", description = "认证模块接口"),
-        (name = "User", description = "用户管理接口"),
+        (name = "User", description = "用户管理接口（普通用户）"),
+        (name = "Admin", description = "管理员专属接口"),
     )
 )]
 pub struct ApiDoc;

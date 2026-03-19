@@ -6,7 +6,7 @@
 //!
 //! ```json
 //! {
-//!     "code": 200,
+//!     "code": 0,
 //!     "success": true,
 //!     "data": { ... },
 //!     "msg": "ok"

@@ -4,15 +4,18 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::error::AppError;
+use crate::model::user_model::Role;
 
 /// JWT 载荷 (Payload)
 ///
 /// 其中包含了我们需要在无状态请求中传递的信息，
-/// 这里只存放了用户 ID 以及 Token 的过期时间。
+/// 这里只存放了用户 ID、Role 以及 Token 的过期时间。
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     /// 用户的唯一标识符
     pub sub: Uuid,
+    /// 用户角色
+    pub role: Role,
     /// 签发人 (Issuer)
     pub iss: String,
     /// 签发时间 (Issued At)
@@ -23,13 +26,19 @@ pub struct Claims {
 
 /// 签发 Token (Access 或 Refresh)
 ///
-/// 传入用户 ID, 密钥以及有效期，返回生成的 JWT 字符串
-pub fn sign_token(user_id: Uuid, secret: &str, expiration: Duration) -> Result<String, AppError> {
+/// 传入用户 ID, 角色, 密钥以及有效期，返回生成的 JWT 字符串
+pub fn sign_token(
+    user_id: Uuid,
+    role: Role,
+    secret: &str,
+    expiration: Duration,
+) -> Result<String, AppError> {
     let now = Utc::now();
     let expire_at = now + expiration;
 
     let claims = Claims {
         sub: user_id,
+        role,
         iss: "crowdfunding_practice".to_string(),
         iat: now.timestamp() as usize,
         exp: expire_at.timestamp() as usize,

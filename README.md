@@ -205,7 +205,7 @@ cargo build 2>&1 || true
 
 ### 📌 Auth/登录 模块 (公开)
 - `POST /api/v1/auth/register`: 注册新账号
-- `POST /api/v1/auth/login`: 账户密码校验（如成功则一并签发 Access/Refresh 的双 Token）
+- `POST /api/v1/auth/login`: 账号密码校验（如成功则一并签发 Access/Refresh 的双 Token）
 
 ### 🔐 User 模块 (需携头部: `Authorization: Bearer <Access-Token>`)
 - `PUT /api/v1/users`: 更新用户基本资料 (调用提取器直接获取解析后的用户 id)

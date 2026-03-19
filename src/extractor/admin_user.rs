@@ -10,14 +10,15 @@ use axum_extra::{
 use std::sync::Arc;
 use uuid::Uuid;
 
+use crate::model::user_model::Role;
 use crate::{AppState, error::AppError, util::jwt::verify_token};
 
-/// JWT 鉴权提取器 (Extractor)
+/// 管理员鉴权提取器 (Extractor)
 ///
-/// 任何需要 `User` 角色登录才能访问的接口，只需要在参数列表中加上 `AuthenticatedUser(user_id)` 即可。
-pub struct AuthenticatedUser(pub Uuid);
+/// 只有 JWT 解析出的角色为 `Admin` 的用户才能通过。
+pub struct AdminUser(pub Uuid);
 
-impl<S> FromRequestParts<S> for AuthenticatedUser
+impl<S> FromRequestParts<S> for AdminUser
 where
     S: Send + Sync,
     Arc<AppState>: axum::extract::FromRef<S>,
@@ -25,13 +26,11 @@ where
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        // 1. 从请求头中提取 Authorization: Bearer <token>
         let TypedHeader(Authorization(bearer)) = parts
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
             .map_err(|_| AppError::Unauthorized("缺少认证 Token 或格式错误".to_string()))?;
 
-        // 2. 正确地从 Axum 状态中提取 AppState
         let State(app_state) = parts
             .extract_with_state::<State<Arc<AppState>>, _>(state)
             .await
@@ -39,10 +38,14 @@ where
 
         let secret = &app_state.config.jwt_access_secret;
 
-        // 3. 验证 Token (这步调用了我们第一步写的纯函数)
         let claims = verify_token(bearer.token(), secret)?;
 
-        // 4. 验证通过，把解析出的用户 ID 包裹在 AuthenticatedUser 中传递给下游 Handler
+        if claims.role != Role::Admin {
+            return Err(AppError::Forbidden(
+                "权限不足：仅管理员可执行该操作".to_string(),
+            ));
+        }
+
         Ok(Self(claims.sub))
     }
 }

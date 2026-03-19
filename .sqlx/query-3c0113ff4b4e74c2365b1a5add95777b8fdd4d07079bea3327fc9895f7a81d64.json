@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO users (email, password_hash, username, age, gender)\n                VALUES ($1, $2, $3, $4, $5)\n                RETURNING id, email, password_hash, username, age, gender as \"gender: _\", is_active, created_at, updated_at\n            ",
+  "query": "\n                INSERT INTO users (email, password_hash, username, age, gender)\n                VALUES ($1, $2, $3, $4, $5)\n                RETURNING id, email, password_hash, username, age, gender as \"gender: _\", role as \"role: _\", is_deactivated, is_banned, created_at, updated_at\n            ",
   "describe": {
     "columns": [
       {
@@ -46,16 +46,36 @@
       },
       {
         "ordinal": 6,
-        "name": "is_active",
-        "type_info": "Bool"
+        "name": "role: _",
+        "type_info": {
+          "Custom": {
+            "name": "user_role",
+            "kind": {
+              "Enum": [
+                "user",
+                "admin"
+              ]
+            }
+          }
+        }
       },
       {
         "ordinal": 7,
+        "name": "is_deactivated",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "is_banned",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 8,
+        "ordinal": 10,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
@@ -89,8 +109,10 @@
       true,
       false,
       false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "b1eb1389dbd10e0d94e708efe7a76ddb7e9cae07ab6b2576a1d869c76c675815"
+  "hash": "3c0113ff4b4e74c2365b1a5add95777b8fdd4d07079bea3327fc9895f7a81d64"
 }

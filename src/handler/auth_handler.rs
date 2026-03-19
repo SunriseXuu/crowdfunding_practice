@@ -30,11 +30,16 @@ pub async fn login(
     // 签发双 Token
     let access_token = jwt::sign_token(
         user.id,
+        user.role.clone(),
         &state.config.jwt_access_secret,
         Duration::minutes(15),
     )?;
-    let refresh_token =
-        jwt::sign_token(user.id, &state.config.jwt_refresh_secret, Duration::days(7))?;
+    let refresh_token = jwt::sign_token(
+        user.id,
+        user.role.clone(),
+        &state.config.jwt_refresh_secret,
+        Duration::days(7),
+    )?;
 
     Ok(ApiResponse::success(LoginRes {
         user,

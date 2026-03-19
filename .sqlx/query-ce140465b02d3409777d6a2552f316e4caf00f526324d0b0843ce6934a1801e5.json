@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT id, email, password_hash, username, age, gender as \"gender: _\", is_active, created_at, updated_at\n                FROM users\n                WHERE id = $1 AND is_active = true\n            ",
+  "query": "\n                SELECT id, email, password_hash, username, age, gender as \"gender: _\", role as \"role: _\", is_deactivated, is_banned, created_at, updated_at\n                FROM users\n                WHERE email = $1 AND is_deactivated = false AND is_banned = false\n            ",
   "describe": {
     "columns": [
       {
@@ -46,23 +46,43 @@
       },
       {
         "ordinal": 6,
-        "name": "is_active",
-        "type_info": "Bool"
+        "name": "role: _",
+        "type_info": {
+          "Custom": {
+            "name": "user_role",
+            "kind": {
+              "Enum": [
+                "user",
+                "admin"
+              ]
+            }
+          }
+        }
       },
       {
         "ordinal": 7,
+        "name": "is_deactivated",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "is_banned",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 8,
+        "ordinal": 10,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid"
+        "Text"
       ]
     },
     "nullable": [
@@ -74,8 +94,10 @@
       true,
       false,
       false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "b8e9dfe7e59eb7f031e44792d2f3fee782cdba34589e919215ba9c756109ce92"
+  "hash": "ce140465b02d3409777d6a2552f316e4caf00f526324d0b0843ce6934a1801e5"
 }

@@ -40,9 +40,9 @@ pub fn update_current_user_password() {}
     delete,
     path = "/api/v1/users",
     responses(
-        (status = 200, description = "注销成功", body = ApiResponse<NoData>)
+        (status = 200, description = "账号注销成功", body = ApiResponse<NoData>)
     ),
     security(("jwt" = [])),
     tag = "User"
 )]
-pub fn soft_delete_user() {}
+pub fn deactivate_current_user() {}

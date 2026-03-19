@@ -3,7 +3,7 @@ use serde::Serialize;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::model::{Gender, User};
+use crate::model::{Gender, User, user_model::Role};
 
 /// 用户信息响应体
 #[derive(Debug, Serialize, ToSchema)]
@@ -13,7 +13,9 @@ pub struct UserRes {
     pub username: String,
     pub age: Option<i32>,
     pub gender: Option<Gender>,
-    pub is_active: bool,
+    pub role: Role,
+    pub is_deactivated: bool,
+    pub is_banned: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -29,7 +31,9 @@ impl From<User> for UserRes {
             username: user.username,
             age: user.age,
             gender: user.gender,
-            is_active: user.is_active,
+            role: user.role,
+            is_deactivated: user.is_deactivated,
+            is_banned: user.is_banned,
             created_at: user.created_at,
             updated_at: user.updated_at,
         }

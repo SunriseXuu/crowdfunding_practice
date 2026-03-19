@@ -24,7 +24,7 @@ impl UserRepo {
             r#"
                 INSERT INTO users (email, password_hash, username, age, gender)
                 VALUES ($1, $2, $3, $4, $5)
-                RETURNING id, email, password_hash, username, age, gender as "gender: _", is_active, created_at, updated_at
+                RETURNING id, email, password_hash, username, age, gender as "gender: _", role as "role: _", is_deactivated, is_banned, created_at, updated_at
             "#,
             email,
             password_hash,
@@ -41,9 +41,9 @@ impl UserRepo {
         sqlx::query_as!(
             User,
             r#"
-                SELECT id, email, password_hash, username, age, gender as "gender: _", is_active, created_at, updated_at
+                SELECT id, email, password_hash, username, age, gender as "gender: _", role as "role: _", is_deactivated, is_banned, created_at, updated_at
                 FROM users
-                WHERE id = $1 AND is_active = true
+                WHERE id = $1 AND is_deactivated = false AND is_banned = false
             "#,
             id
         )
@@ -56,9 +56,9 @@ impl UserRepo {
         sqlx::query_as!(
             User,
             r#"
-                SELECT id, email, password_hash, username, age, gender as "gender: _", is_active, created_at, updated_at
+                SELECT id, email, password_hash, username, age, gender as "gender: _", role as "role: _", is_deactivated, is_banned, created_at, updated_at
                 FROM users
-                WHERE email = $1 AND is_active = true
+                WHERE email = $1 AND is_deactivated = false AND is_banned = false
             "#,
             email
         )
@@ -82,8 +82,8 @@ impl UserRepo {
                     username = COALESCE($2::VARCHAR, username),
                     age = COALESCE($3::INT, age),
                     gender = COALESCE($4::gender_enum, gender)
-                WHERE id = $1 AND is_active = true
-                RETURNING id, email, password_hash, username, age, gender as "gender: _", is_active, created_at, updated_at
+                WHERE id = $1 AND is_deactivated = false AND is_banned = false
+                RETURNING id, email, password_hash, username, age, gender as "gender: _", role as "role: _", is_deactivated, is_banned, created_at, updated_at
             "#,
             id,
             username,
@@ -100,7 +100,7 @@ impl UserRepo {
             r#"
                 UPDATE users
                 SET password_hash = $2
-                WHERE id = $1 AND is_active = true
+                WHERE id = $1 AND is_deactivated = false AND is_banned = false
             "#,
             id,
             password_hash
@@ -111,13 +111,29 @@ impl UserRepo {
         Ok(result.rows_affected())
     }
 
-    /// 软删除一个用户数据库操作：将 is_active 设为 false
-    pub async fn soft_delete(pool: &PgPool, id: Uuid) -> Result<u64> {
+    /// 用户自行注销账号数据库操作：将 is_deactivated 设为 true
+    pub async fn deactivate(pool: &PgPool, id: Uuid) -> Result<u64> {
         let result = sqlx::query!(
             r#"
                 UPDATE users
-                SET is_active = false
-                WHERE id = $1 AND is_active = true
+                SET is_deactivated = true
+                WHERE id = $1 AND is_deactivated = false AND is_banned = false
+            "#,
+            id
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(result.rows_affected())
+    }
+
+    /// 管理员封禁账号数据库操作：将 is_banned 设为 true
+    pub async fn ban(pool: &PgPool, id: Uuid) -> Result<u64> {
+        let result = sqlx::query!(
+            r#"
+                UPDATE users
+                SET is_banned = true
+                WHERE id = $1 AND is_deactivated = false AND is_banned = false
             "#,
             id
         )

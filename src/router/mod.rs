@@ -1,3 +1,4 @@
+pub mod admin_router;
 pub mod auth_router;
 pub mod user_router;
 
@@ -14,6 +15,8 @@ pub fn init_router(state: Arc<AppState>) -> Router {
         .nest("/api/v1/auth", auth_router::routes())
         // 挂载用户模块路由
         .nest("/api/v1/users", user_router::routes())
+        // 挂载管理员专属路由
+        .nest("/api/v1/admin", admin_router::routes())
         // 挂载状态
         .with_state(state)
 }

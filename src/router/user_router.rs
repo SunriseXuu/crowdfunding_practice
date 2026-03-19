@@ -14,5 +14,5 @@ pub fn routes() -> Router<Arc<AppState>> {
         .route("/me", get(user_handler::retrieve))
         .route("/", put(user_handler::update))
         .route("/password", patch(user_handler::update_password))
-        .route("/", delete(user_handler::soft_delete))
+        .route("/", delete(user_handler::deactivate))
 }
