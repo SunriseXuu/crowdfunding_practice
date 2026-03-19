@@ -29,9 +29,9 @@ src/
 ├── config/            # 配置层：读取 .env，暴露强类型的全局单例配置 (AppConfig)
 ├── model/             # 领域实体层：与数据库表结构 1:1 映射的纯“贫血”数据结构体 (不会污染业务逻辑)
 ├── repository/        # 数据访问层 (Repo)：隔离所有 sqlx 宏查询操作，通过编译期检查保护数据的进出
-├── service/           # 业务逻辑层：最核心的包。处理密码哈希验证、鉴权、调用 Repo 获取数据并组装返回 DTO
+├── service/           # 业务逻辑层 (胖服务)：最核心的包，处理所有与业务相关的逻辑
 ├── dto/               # 数据传输对象 (Data Transfer Object)：隔离层。定义外部 Request 与 Response 格式
-├── handler/           # 控制器层 (Controller)：解析 HTTP 协议，装配参数（调用 Extractor），最终分发给 Service
+├── handler/           # 控制器层 (瘦控制器)：解析 HTTP 协议，调用 Extractor 提炼用户参数后，纯转发调度给 Service
 ├── router/            # 路由网关层：定义各类模块（如 auth, user）的路由表，彻底解耦 Handler 与具体的 URL
 ├── extractor/         # 提取器层 (Extractor)：包含统一参数验证 (ValidatedJson) 与鉴权拦截器 (AuthUser)
 └── error/             # 全局错误处理：实现 IntoResponse，抹平所有内部异常并统一序列化为 JSON 返回
@@ -110,13 +110,13 @@ sequenceDiagram
     deactivate Middleware
 ```
 
-### 3. 双重 JWT 无状态鉴权方案
-不再使用一招鲜的万能 Token。
-- **Access Token 认证**：仅提供 15 分钟有效期，被 `AuthUser` 提取器拦截，用于常规接口放行。
-- **Refresh Token 续签**：有效期 7 天。
-- **物理性密钥隔离**：这两枚 Token 的签发分别使用完全不同长度的环境变量私钥（`JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`），并在生成时附带了过期时间，即使黑客窃取一者也无法冒充另一者。
+### 4. 双重 JWT 无状态鉴权与 RBAC 权限系统
+不再使用一招鲜的万能 Token。实现了极致端到端独立的权限控制表：
+- **Access Token 认证**：仅提供 15 分钟有效期，被 `AuthenticatedUser` 提取器拦截，用于常规业务接口放行。
+- **Refresh Token 续签通道**：有效期 7 天。跨端前端项目通过调用 `POST /api/v1/auth/refresh` 可实现完全无感的自动续期。
+- **RBAC 超级门卫**：载荷中嵌入了 `Role`（`user` / `admin`）。为管理员专用网络构建了 `AdminUser` 权限提取器，一旦检测到越权操作即刻硬性拒绝（403 Forbidden）。
 
-### 3. ApiResponse 全局统一切面
+### 5. ApiResponse 全局统一切面
 所有接口强制返回统一规范的 JSON，并且内部集成各种各样的错误抛出。
 ```json
 {
@@ -127,6 +127,11 @@ sequenceDiagram
 }
 ```
 当系统级挂在遇到 `sqlx::Error` 和 `jsonwebtoken::errors` 时，使用 `From` trait，底层自动切面转换为 500 大报错或者 401 拒止日志，对 C 端脱敏只返回友好提示语。
+
+### 6. OpenAPI (Swagger) 与 HTTP 原生测试生态
+为了打造完美的微服务沉浸式开发对接体验，全面告别口头协议和零散的 Postman：
+- **互动的 Swagger UI**：在所有响应结构和路由上挂载了 `utoipa` 宏，只需访问启动后的 `http://localhost:8080/swagger-ui` 即可享用官方自动刷新的可视化数据看板。
+- **Jetbrains / VS Code 原生脚本**：提取了庞大的项目 `http/` 目录。使用 `.http` 格式对复杂的跨请求传递（Token 全局上下文替换）一通全包，开发调错如丝般顺滑。
 
 ---
 
@@ -203,11 +208,16 @@ cargo build 2>&1 || true
 
 ## 📜 当前可用 API (v1 API Reference)
 
-### 📌 Auth/登录 模块 (公开)
-- `POST /api/v1/auth/register`: 注册新账号
-- `POST /api/v1/auth/login`: 账号密码校验（如成功则一并签发 Access/Refresh 的双 Token）
+### 📌 Auth 模块 (公开与续期)
+- `POST /api/v1/auth/register`: 新账号注册
+- `POST /api/v1/auth/login`: 账号密码校验并安全下发 Access/Refresh 双端 Token
+- `POST /api/v1/auth/refresh`: 核心长效保活信道。消耗有效 Refresh Token 单独换取全系新牌照
 
 ### 🔐 User 模块 (需携头部: `Authorization: Bearer <Access-Token>`)
-- `PUT /api/v1/users`: 更新用户基本资料 (调用提取器直接获取解析后的用户 id)
-- `PATCH /api/v1/users/password`: 校验老密码并修改为新的 Argon2 密码
-- `DELETE /api/v1/users`: 软删除（置 `is_active` 为 false），将触发所有后续登录验证拦截至无效
+- `GET /api/v1/users/me`: 获取当前拥有者的极密隐私库数据
+- `PUT /api/v1/users`: 局部资料更新（如用户名/年龄/性别）
+- `PATCH /api/v1/users/password`: 严格风控环节（依赖高强度的 Argon2 就地校对后覆盖改密）
+- `DELETE /api/v1/users/me`: 主动退网功能（标记 `is_deactivated = true`），Token 入黑洞
+
+### 🛡 Admin 模块 (必需超管身份: `Role::Admin`)
+- `DELETE /api/v1/admin/users/{id}`: 天降封禁之锤（强行设置 `is_banned = true`）
