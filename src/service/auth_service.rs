@@ -61,4 +61,14 @@ impl AuthService {
 
         Ok(UserRes::from(user))
     }
+
+    /// 刷新 Token 验证业务
+    /// 用于确保持有合法 Refresh Token 的用户依然处于正常允许登录的状态
+    pub async fn refresh(pool: &PgPool, user_id: uuid::Uuid) -> Result<UserRes, AppError> {
+        let user = UserRepo::find_by_id(pool, user_id).await?.ok_or_else(|| {
+            AppError::Unauthorized("该账号已被注销或封禁，Token 失效".to_string())
+        })?;
+
+        Ok(UserRes::from(user))
+    }
 }

@@ -10,4 +10,5 @@ pub fn routes() -> Router<Arc<crate::AppState>> {
     Router::new()
         .route("/register", post(auth_handler::register))
         .route("/login", post(auth_handler::login))
+        .route("/refresh", post(auth_handler::refresh))
 }

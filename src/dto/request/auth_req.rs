@@ -37,3 +37,11 @@ pub struct LoginReq {
     /// 密码（不需校验长度，直接传给后端比对）
     pub password: String,
 }
+
+/// 刷新 Token 请求体
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct RefreshReq {
+    /// 之前获取的合法长效 Refresh Token
+    #[validate(length(min = 1, message = "Refresh Token 不能为空"))]
+    pub refresh_token: String,
+}

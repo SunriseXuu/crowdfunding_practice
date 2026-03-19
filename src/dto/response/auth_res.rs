@@ -3,7 +3,7 @@ use utoipa::ToSchema;
 
 use crate::dto::response::user_res::UserRes;
 
-/// 登录成功附带的 Token 凭证
+/// 登录成功附带的 Token
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthTokens {
     pub access_token: String,

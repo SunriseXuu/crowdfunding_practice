@@ -27,3 +27,13 @@ Content-Type: application/json
 
 # 💡 小提示：登录成功后，您可以复制 response body 中的 access_token，
 # 粘贴到后续 user.http 和 admin.http 中的变量处！
+
+### 3. 使用长效 Token 刷新获取新 Token
+# @name refresh
+# 💡 请去上一步 Login 的 Response 中复制 refresh_token 填入下方
+POST {{base_url}}/auth/refresh
+Content-Type: application/json
+
+{
+    "refresh_token": "填入真实的长效 refresh_token 字符串"
+}

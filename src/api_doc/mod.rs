@@ -10,6 +10,7 @@ use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::{Modify, OpenApi};
 
 use crate::dto::request::*;
+use crate::dto::request::auth_req::RefreshReq;
 use crate::dto::response::{api_res::NoData, *};
 use crate::model::Gender;
 
@@ -18,6 +19,7 @@ use crate::model::Gender;
     paths(
         auth_api_doc::register_user,
         auth_api_doc::login_user,
+        auth_api_doc::refresh_token,
         user_api_doc::retrieve_current_user,
         user_api_doc::update_current_user,
         user_api_doc::update_current_user_password,
@@ -34,6 +36,7 @@ use crate::model::Gender;
             LoginReq,
             LoginRes,
             NoData,
+            RefreshReq,
             RegisterReq,
             UpdatePasswordReq,
             UpdateUserReq,
