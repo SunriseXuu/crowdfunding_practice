@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::error::AppError;
-use crate::model::user_model::Role;
+use crate::model::UserRole;
 
 /// JWT 载荷 (Payload)
 ///
@@ -15,7 +15,7 @@ pub struct Claims {
     /// 用户的唯一标识符
     pub sub: Uuid,
     /// 用户角色
-    pub role: Role,
+    pub role: UserRole,
     /// 签发人 (Issuer)
     pub iss: String,
     /// 签发时间 (Issued At)
@@ -29,7 +29,7 @@ pub struct Claims {
 /// 传入用户 ID, 角色, 密钥以及有效期，返回生成的 JWT 字符串
 pub fn sign_token(
     user_id: Uuid,
-    role: Role,
+    role: UserRole,
     secret: &str,
     expiration: Duration,
 ) -> Result<String, AppError> {

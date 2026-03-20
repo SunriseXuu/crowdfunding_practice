@@ -14,7 +14,7 @@ pub enum Gender {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Type, PartialEq, Eq, ToSchema)]
 #[sqlx(type_name = "user_role", rename_all = "lowercase")] // 绑定 Postgres 枚举
-pub enum Role {
+pub enum UserRole {
     User,
     Admin,
 }
@@ -38,7 +38,7 @@ pub struct User {
     /// 性别
     pub gender: Option<Gender>,
     /// 用户角色
-    pub role: Role,
+    pub role: UserRole,
     /// 是否已自行注销账号（软删除）
     pub is_deactivated: bool,
     /// 是否已被管理员封禁（软删除）

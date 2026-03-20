@@ -1,4 +1,5 @@
+pub mod campaign_model;
 pub mod user_model;
-pub mod order_model;
 
-pub use user_model::{Gender, User};
+pub use campaign_model::{Campaign, CampaignStatus};
+pub use user_model::{Gender, User, UserRole};

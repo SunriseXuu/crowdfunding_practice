@@ -10,7 +10,7 @@ use axum_extra::{
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::model::user_model::Role;
+use crate::model::UserRole;
 use crate::{AppState, error::AppError, util::jwt::verify_token};
 
 /// 管理员鉴权提取器 (Extractor)
@@ -40,7 +40,7 @@ where
 
         let claims = verify_token(bearer.token(), secret)?;
 
-        if claims.role != Role::Admin {
+        if claims.role != UserRole::Admin {
             return Err(AppError::Forbidden(
                 "权限不足：仅管理员可执行该操作".to_string(),
             ));

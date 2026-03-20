@@ -3,7 +3,7 @@ use serde::Serialize;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::model::{Gender, User, user_model::Role};
+use crate::model::{Gender, User, UserRole};
 
 /// 用户信息响应体
 #[derive(Debug, Serialize, ToSchema)]
@@ -13,7 +13,7 @@ pub struct UserRes {
     pub username: String,
     pub age: Option<i32>,
     pub gender: Option<Gender>,
-    pub role: Role,
+    pub role: UserRole,
     pub is_deactivated: bool,
     pub is_banned: bool,
     pub created_at: DateTime<Utc>,
