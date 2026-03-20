@@ -1,0 +1,44 @@
+### 众筹项目模块接口测试 (Campaign Module)
+
+@base_url = http://localhost:8080/api/v1
+
+# 💡 请从 auth.http 登录获取 Token 后填入下方
+@user_token = Bearer YOUR_ACCESS_TOKEN_HERE
+
+### 1. 发起一个众筹项目 (Create)
+# @name create_campaign
+POST {{base_url}}/campaigns
+Content-Type: application/json
+Authorization: {{user_token}}
+
+{
+    "title": "极客机械键盘 - 开拓者 R1",
+    "description": "这是一款专为程序员打造的 75% 布局全铝合金机械键盘，支持全键无冲与热插拔。",
+    "goal_amount": 10000000,
+    "start_at": "2026-04-01T00:00:00Z",
+    "end_at": "2026-05-01T00:00:00Z"
+}
+
+### 2. 获取所有活跃的众筹项目 (List Active)
+GET {{base_url}}/campaigns
+
+### 3. 查看众筹项目详情 (Retrieve)
+# 请替换下方的 UUID 为真实创建成功的 ID
+GET {{base_url}}/campaigns/123e4567-e89b-12d3-a456-426614174001
+
+### 4. 修改众筹项目信息 (Update)
+# 注意：只有 Pending 状态的项目允许修改关键信息
+PUT {{base_url}}/campaigns/123e4567-e89b-12d3-a456-426614174001
+Content-Type: application/json
+Authorization: {{user_token}}
+
+{
+    "title": "极客机械键盘 - 开拓者 R1 (限量版)",
+    "description": "更新：首批用户将赠送定制键帽一套。",
+    "goal_amount": 12000000
+}
+
+### 5. 取消/下架众筹项目 (Cancel)
+# 注意：只有创建者可以主动取消
+DELETE {{base_url}}/campaigns/123e4567-e89b-12d3-a456-426614174001
+Authorization: {{user_token}}

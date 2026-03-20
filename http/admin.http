@@ -9,3 +9,8 @@
 # 请将 URL 最后的 UUID 替换为您要封禁的真正用户的 ID（可从数据库或列表获取）
 DELETE {{base_url}}/admin/users/123e4567-e89b-12d3-a456-426614174000
 Authorization: {{admin_token}}
+
+### 2. 强行下架/取消违规众筹项目 (Force Cancel Campaign)
+# 请将 URL 最后的 UUID 替换为违规项目的 ID
+DELETE {{base_url}}/admin/campaigns/123e4567-e89b-12d3-a456-426614174001
+Authorization: {{admin_token}}
