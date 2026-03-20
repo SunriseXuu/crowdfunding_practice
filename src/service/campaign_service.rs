@@ -65,8 +65,8 @@ impl CampaignService {
         Ok(CampaignRes::from(updated))
     }
 
-    /// 取消一个众筹项目业务
-    pub async fn cancel(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<CampaignRes, AppError> {
+    /// 下架一个众筹项目业务
+    pub async fn offline(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<CampaignRes, AppError> {
         // 1. 获取原项目并校验权限
         let original = CampaignRepo::find_by_id(pool, id)
             .await?
@@ -75,11 +75,9 @@ impl CampaignService {
             return Err(AppError::Forbidden("无权操作他人的项目".to_string()));
         }
 
-        // 2. 状态校验：只有 Pending 或 Active 状态可以取消
-        if original.status != CampaignStatus::Pending && original.status != CampaignStatus::Active {
-            return Err(AppError::BadRequest(
-                "只有待发布或活跃的项目可以取消".to_string(),
-            ));
+        // 2. 状态校验：只有 Active 状态可以取消
+        if original.status != CampaignStatus::Active {
+            return Err(AppError::BadRequest("只有活跃的项目可以取消".to_string()));
         }
 
         // 3. 执行取消

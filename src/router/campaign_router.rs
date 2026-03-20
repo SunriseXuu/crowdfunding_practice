@@ -15,5 +15,5 @@ pub fn routes() -> Router<Arc<AppState>> {
         .route("/", get(campaign_handler::list_active))
         .route("/{id}", get(campaign_handler::retrieve))
         .route("/{id}", put(campaign_handler::update))
-        .route("/{id}", delete(campaign_handler::cancel))
+        .route("/{id}", delete(campaign_handler::offline))
 }
