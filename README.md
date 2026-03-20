@@ -114,9 +114,13 @@ sequenceDiagram
 不再使用一招鲜的万能 Token。实现了极致端到端独立的权限控制表：
 - **Access Token 认证**：仅提供 15 分钟有效期，被 `AuthenticatedUser` 提取器拦截，用于常规业务接口放行。
 - **Refresh Token 续签通道**：有效期 7 天。跨端前端项目通过调用 `POST /api/v1/auth/refresh` 可实现完全无感的自动续期。
-- **RBAC 超级门卫**：载荷中嵌入了 `Role`（`user` / `admin`）。为管理员专用网络构建了 `AdminUser` 权限提取器，一旦检测到越权操作即刻硬性拒绝（403 Forbidden）。
+- **RBAC 超级门卫**：载荷中嵌入了 `UserRole`（`User` / `Admin`）。为管理员专用路由构建了 `AdminUser` 权限提取器，一旦检测到越权操作即刻硬性拒绝（403 Forbidden）。
 
-### 5. ApiResponse 全局统一切面
+### 5. 众筹业务状态机与金额精度
+- **金额精度约束**：全局硬性约束。所有金额在 PG/Rust 中一律存储为 `BIGINT` (单位：分)，从根本上规避浮点数计算导致的精度丢失。
+- **状态流转控制**：实现 `Pending` -> `Active` -> `Funded`/`Failed`/`Cancelled` 的严格状态机控制。
+
+### 6. ApiResponse 全局统一切面
 所有接口强制返回统一规范的 JSON，并且内部集成各种各样的错误抛出。
 ```json
 {
@@ -128,10 +132,10 @@ sequenceDiagram
 ```
 当系统级挂在遇到 `sqlx::Error` 和 `jsonwebtoken::errors` 时，使用 `From` trait，底层自动切面转换为 500 大报错或者 401 拒止日志，对 C 端脱敏只返回友好提示语。
 
-### 6. OpenAPI (Swagger) 与 HTTP 原生测试生态
+### 7. OpenAPI (Swagger) 与 HTTP 原生测试生态
 为了打造完美的微服务沉浸式开发对接体验，全面告别口头协议和零散的 Postman：
-- **互动的 Swagger UI**：在所有响应结构和路由上挂载了 `utoipa` 宏，只需访问启动后的 `http://localhost:8080/swagger-ui` 即可享用官方自动刷新的可视化数据看板。
-- **Jetbrains / VS Code 原生脚本**：提取了庞大的项目 `http/` 目录。使用 `.http` 格式对复杂的跨请求传递（Token 全局上下文替换）一通全包，开发调错如丝般顺滑。
+- **互动的 Swagger UI**：在所有响应结构和路由上挂载了 `utoipa` 宏，只需访问启动后的 `http://localhost:8080/swagger-ui` 即可。
+- **Jetbrains / VS Code 原生脚本**：提供 `http/` 目录，包含 `auth`, `user`, `campaign`, `admin` 的 `.http` 测试脚本，支持 Token 全局变量传递。
 
 ---
 
@@ -198,26 +202,34 @@ cargo check
 cargo run
 ```
 
-**3. 查看完整宏报错日志**
-如果你在编写带 `sqlx` 宏的自动化脚本，或想彻底看到所有因为宏替换而导致的 `stderr` 管道内容，可使用：
+**3. 使用热重载运行 (cargo watch)**
+推荐安装 `cargo-watch` 工具：
 ```bash
-cargo build 2>&1 || true
+cargo watch -x run
 ```
 
 ---
 
 ## 📜 当前可用 API (v1 API Reference)
 
-### 📌 Auth 模块 (公开与续期)
-- `POST /api/v1/auth/register`: 新账号注册
-- `POST /api/v1/auth/login`: 账号密码校验并安全下发 Access/Refresh 双端 Token
-- `POST /api/v1/auth/refresh`: 核心长效保活信道。消耗有效 Refresh Token 单独换取全系新牌照
+### 📌 Auth 模块 (公开)
+- `POST /api/v1/auth/register`: 用户注册
+- `POST /api/v1/auth/login`: 账号密码登录
+- `POST /api/v1/auth/refresh`: 刷新 Access Token
 
-### 🔐 User 模块 (需携头部: `Authorization: Bearer <Access-Token>`)
-- `GET /api/v1/users/me`: 获取当前拥有者的极密隐私库数据
-- `PUT /api/v1/users`: 局部资料更新（如用户名/年龄/性别）
-- `PATCH /api/v1/users/password`: 严格风控环节（依赖高强度的 Argon2 就地校对后覆盖改密）
-- `DELETE /api/v1/users/me`: 主动退网功能（标记 `is_deactivated = true`），Token 入黑洞
+### 🔐 User 模块 (需 Header: `Authorization: Bearer <Access-Token>`)
+- `GET /api/v1/users/me`: 获取个人信息
+- `PUT /api/v1/users`: 更新资料 (局部)
+- `PATCH /api/v1/users/password`: 修改密码
+- `DELETE /api/v1/users/me`: 注销账号 (软删除)
 
-### 🛡 Admin 模块 (必需超管身份: `Role::Admin`)
-- `DELETE /api/v1/admin/users/{id}`: 天降封禁之锤（强行设置 `is_banned = true`）
+### 📦 Campaign 模块 (众筹业务)
+- `POST /api/v1/campaigns`: 发起众筹 (需认证)
+- `GET /api/v1/campaigns`: 获取活跃项目列表 (公开)
+- `GET /api/v1/campaigns/{id}`: 查看项目详情
+- `PUT /api/v1/campaigns/{id}`: 更新项目 (限创建者 & Pending)
+- `DELETE /api/v1/campaigns/{id}`: 取消项目 (限创建者)
+
+### 🛡 Admin 模块 (需身份: `UserRole::Admin`)
+- `DELETE /api/v1/admin/users/{id}`: 强制封禁账号
+- `DELETE /api/v1/admin/campaigns/{id}`: 强制下架违规项目
