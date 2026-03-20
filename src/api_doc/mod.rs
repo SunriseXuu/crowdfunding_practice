@@ -26,6 +26,7 @@ pub use crate::model::Gender;
         user_api_doc::update_current_user_password,
         user_api_doc::deactivate_current_user,
         admin_api_doc::ban_user,
+        admin_api_doc::cancel_campaign,
         campaign_api_doc::create_campaign,
         campaign_api_doc::list_active_campaigns,
         campaign_api_doc::retrieve_campaign,

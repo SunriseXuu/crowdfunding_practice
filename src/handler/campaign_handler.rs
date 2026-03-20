@@ -50,12 +50,12 @@ pub async fn update(
     Ok(ApiResponse::success(res))
 }
 
-/// 下架一个众筹项目接口
-pub async fn offline(
+/// 取消一个众筹项目接口
+pub async fn cancel(
     State(state): State<Arc<AppState>>,
     AuthenticatedUser(user_id): AuthenticatedUser,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
-    let res = CampaignService::offline(&state.pool, id, user_id).await?;
+    let res = CampaignService::cancel(&state.pool, id, user_id).await?;
     Ok(ApiResponse::success(res))
 }

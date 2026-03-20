@@ -65,8 +65,8 @@ impl CampaignService {
         Ok(CampaignRes::from(updated))
     }
 
-    /// 下架一个众筹项目业务
-    pub async fn offline(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<CampaignRes, AppError> {
+    /// 取消一个众筹项目业务
+    pub async fn cancel(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<CampaignRes, AppError> {
         // 1. 获取原项目并校验权限
         let original = CampaignRepo::find_by_id(pool, id)
             .await?

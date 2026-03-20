@@ -15,3 +15,19 @@ use super::*;
     tag = "Admin"
 )]
 pub fn ban_user() {}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/admin/campaigns/{id}",
+    params(
+        ("id" = Uuid, Path, description = "众筹项目的 UUID")
+    ),
+    responses(
+        (status = 200, description = "管理员强制取消众筹项目成功", body = ApiResponse<NoData>),
+        (status = 403, description = "权限不足（仅管理员可执行）", body = ApiResponse<NoData>),
+        (status = 404, description = "项目不存在", body = ApiResponse<NoData>)
+    ),
+    security(("jwt" = [])),
+    tag = "Admin"
+)]
+pub fn cancel_campaign() {}
