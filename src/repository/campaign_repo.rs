@@ -71,6 +71,28 @@ impl CampaignRepo {
         Ok(campaign)
     }
 
+    /// 根据ID获取众筹项目并加行级锁（用于事务中的并发控制）
+    pub async fn find_by_id_for_update(
+        tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+        id: Uuid,
+    ) -> Result<Option<Campaign>, AppError> {
+        let campaign = sqlx::query_as!(
+            Campaign,
+            r#"
+                SELECT id, creator_id, title, description, goal_amount, current_amount, 
+                    status as "status: CampaignStatus", start_at, end_at, created_at, updated_at
+                FROM campaigns
+                WHERE id = $1
+                FOR UPDATE
+            "#,
+            id
+        )
+        .fetch_optional(&mut **tx)
+        .await?;
+
+        Ok(campaign)
+    }
+
     /// 更新众筹项目数据库操作
     pub async fn update(
         pool: &PgPool,
@@ -104,28 +126,6 @@ impl CampaignRepo {
         Ok(campaign)
     }
 
-    /// 根据ID获取众筹项目并加行级锁（用于事务中的并发控制）
-    pub async fn find_by_id_for_update(
-        tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-        id: Uuid,
-    ) -> Result<Option<Campaign>, AppError> {
-        let campaign = sqlx::query_as!(
-            Campaign,
-            r#"
-                SELECT id, creator_id, title, description, goal_amount, current_amount, 
-                    status as "status: CampaignStatus", start_at, end_at, created_at, updated_at
-                FROM campaigns
-                WHERE id = $1
-                FOR UPDATE
-            "#,
-            id
-        )
-        .fetch_optional(&mut **tx)
-        .await?;
-
-        Ok(campaign)
-    }
-
     /// 更新众筹项目状态数据库操作
     pub async fn update_status(
         pool: &PgPool,
@@ -149,5 +149,31 @@ impl CampaignRepo {
         .await?;
 
         Ok(campaign)
+    }
+
+    /// 原子的增加众筹金额（防超卖，要求在外部已通过 SELECT FOR UPDATE 锁行）
+    pub async fn add_fund(
+        tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+        campaign_id: Uuid,
+        amount: i64,
+    ) -> Result<(), AppError> {
+        let result = sqlx::query!(
+            r#"
+                UPDATE campaigns
+                SET current_amount = current_amount + $1,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = $2
+            "#,
+            amount,
+            campaign_id
+        )
+        .execute(&mut **tx)
+        .await?;
+
+        if result.rows_affected() == 0 {
+            return Err(AppError::NotFound("未找到对应的众筹项目".to_string()));
+        }
+
+        Ok(())
     }
 }

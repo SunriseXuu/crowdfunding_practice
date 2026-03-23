@@ -39,20 +39,8 @@ impl OrderService {
 
         // 4. 执行更新
         // 4.1 更新众筹项目累积金额
-        // 注意：这里由于上面已经加了 FOR UPDATE 锁，我们可以安全地在 Rust 中计算后写回，
-        // 或者直接用 SQL 叠加。为了严谨，我们直接用 SQL 叠加。
-        sqlx::query!(
-            r#"
-                UPDATE campaigns
-                SET current_amount = current_amount + $1,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = $2
-            "#,
-            req.amount,
-            req.campaign_id
-        )
-        .execute(&mut *tx)
-        .await?;
+        // 我们已将原子的 SQL 叠加下放到 Repository 层，维持分层架构的纯正
+        CampaignRepo::add_fund(&mut tx, req.campaign_id, req.amount).await?;
 
         // 4.2 创建订单流水
         let order = OrderRepo::create(&mut tx, user_id, &req).await?;
