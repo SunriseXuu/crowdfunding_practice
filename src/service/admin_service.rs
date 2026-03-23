@@ -1,9 +1,11 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::error::AppError;
-use crate::model::CampaignStatus;
-use crate::repository::{CampaignRepo, UserRepo};
+use crate::{
+    error::AppError,
+    model::CampaignStatus,
+    repository::{CampaignRepo, UserRepo},
+};
 
 /// 管理员业务逻辑层（Admin Service）
 pub struct AdminService;

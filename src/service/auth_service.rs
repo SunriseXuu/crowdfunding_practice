@@ -5,12 +5,16 @@ use argon2::{
 use chrono::Duration;
 use sqlx::PgPool;
 
-use crate::config::AppConfig;
-use crate::dto::request::{LoginReq, RegisterReq};
-use crate::dto::response::{AuthTokensRes, LoginRes, UserRes};
-use crate::error::AppError;
-use crate::repository::UserRepo;
-use crate::util::jwt;
+use crate::{
+    config::AppConfig,
+    dto::{
+        request::{LoginReq, RegisterReq},
+        response::{AuthTokensRes, LoginRes, UserRes},
+    },
+    error::AppError,
+    repository::UserRepo,
+    util::jwt,
+};
 
 /// 认证业务逻辑层 (Auth Service)
 ///

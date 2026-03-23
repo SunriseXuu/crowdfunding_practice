@@ -1,8 +1,7 @@
 use axum::{Router, routing::delete};
 use std::sync::Arc;
 
-use crate::AppState;
-use crate::handler::admin_handler;
+use crate::{AppState, handler::admin_handler};
 
 /// 管理员模块子路由
 ///

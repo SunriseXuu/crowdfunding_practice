@@ -5,10 +5,14 @@ use argon2::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::dto::request::{UpdatePasswordReq, UpdateUserReq};
-use crate::dto::response::UserRes;
-use crate::error::AppError;
-use crate::repository::UserRepo;
+use crate::{
+    dto::{
+        request::{UpdatePasswordReq, UpdateUserReq},
+        response::UserRes,
+    },
+    error::AppError,
+    repository::UserRepo,
+};
 
 /// 用户业务逻辑层 (User Service)
 ///

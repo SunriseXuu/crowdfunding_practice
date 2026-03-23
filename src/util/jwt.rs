@@ -3,8 +3,7 @@ use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode}
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::error::AppError;
-use crate::model::UserRole;
+use crate::{error::AppError, model::UserRole};
 
 /// JWT 载荷 (Payload)
 ///

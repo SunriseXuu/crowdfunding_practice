@@ -1,6 +1,6 @@
-use crate::{
-    dto::request::{UpdatePasswordReq, UpdateUserReq},
-    dto::response::{ApiResponse, NoData, UserRes},
+use crate::dto::{
+    request::{UpdatePasswordReq, UpdateUserReq},
+    response::{ApiResponse, NoData, UserRes},
 };
 
 #[utoipa::path(

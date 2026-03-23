@@ -1,9 +1,9 @@
-use crate::model::Campaign;
-use crate::model::campaign_model::CampaignStatus;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
+
+use crate::model::{Campaign, CampaignStatus};
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CampaignRes {

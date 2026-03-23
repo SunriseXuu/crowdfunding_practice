@@ -1,12 +1,16 @@
 use axum::{extract::State, response::IntoResponse};
 use std::sync::Arc;
 
-use crate::AppState;
-use crate::dto::ApiResponse;
-use crate::dto::request::{LoginReq, RefreshReq, RegisterReq};
-use crate::error::AppError;
-use crate::extractor::ValidatedJson;
-use crate::service::AuthService;
+use crate::{
+    AppState,
+    dto::{
+        ApiResponse,
+        request::{LoginReq, RefreshReq, RegisterReq},
+    },
+    error::AppError,
+    extractor::ValidatedJson,
+    service::AuthService,
+};
 
 /// 用户注册接口
 pub async fn register(

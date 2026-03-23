@@ -1,12 +1,16 @@
 use axum::{extract::State, response::IntoResponse};
 use std::sync::Arc;
 
-use crate::AppState;
-use crate::dto::ApiResponse;
-use crate::dto::request::{UpdatePasswordReq, UpdateUserReq};
-use crate::error::AppError;
-use crate::extractor::{AuthenticatedUser, ValidatedJson};
-use crate::service::UserService;
+use crate::{
+    AppState,
+    dto::{
+        ApiResponse,
+        request::{UpdatePasswordReq, UpdateUserReq},
+    },
+    error::AppError,
+    extractor::{AuthenticatedUser, ValidatedJson},
+    service::UserService,
+};
 
 /// 当前用户获取自己的信息接口
 pub async fn retrieve(

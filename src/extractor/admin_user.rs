@@ -10,8 +10,7 @@ use axum_extra::{
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::model::UserRole;
-use crate::{AppState, error::AppError, util::jwt::verify_token};
+use crate::{AppState, error::AppError, model::UserRole, util::jwt::verify_token};
 
 /// 管理员鉴权提取器 (Extractor)
 ///

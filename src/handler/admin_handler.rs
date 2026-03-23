@@ -5,11 +5,9 @@ use axum::{
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::AppState;
-use crate::dto::ApiResponse;
-use crate::error::AppError;
-use crate::extractor::AdminUser;
-use crate::service::AdminService;
+use crate::{
+    AppState, dto::ApiResponse, error::AppError, extractor::AdminUser, service::AdminService,
+};
 
 /// 管理员强制封禁一个账号接口
 pub async fn ban_user(
