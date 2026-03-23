@@ -6,7 +6,7 @@ use crate::{AppState, service::SettlementService};
 
 /// 启动结算后台任务
 /// 它会每隔一定时间检查是否有已过期的众筹项目并进行状态切换和退款处理
-pub async fn start(state: Arc<AppState>) {
+pub async fn start_cron(state: Arc<AppState>) {
     info!("⚙️ [Worker] Settlement worker started");
 
     // 设置检查间隔，例如每 60 秒执行一次

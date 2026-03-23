@@ -54,7 +54,7 @@ async fn main() {
     // ── 步骤五：启动后台异步任务 (Worker) ──────────────────────────────────
     let worker_state = Arc::clone(&state);
     tokio::spawn(async move {
-        worker::settlement_worker::start(worker_state).await;
+        worker::settlement::start_cron(worker_state).await;
     });
 
     // ── 步骤六：配置 Axum 路由并启动服务器 ──────────────────────────────────
