@@ -2,8 +2,7 @@ use std::sync::Arc;
 use tokio::time::{Duration, interval};
 use tracing::{error, info};
 
-use crate::app_state::AppState;
-use crate::service::SettlementService;
+use crate::{AppState, service::SettlementService};
 
 /// 启动结算后台任务
 /// 它会每隔一定时间检查是否有已过期的众筹项目并进行状态切换和退款处理

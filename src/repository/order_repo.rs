@@ -103,7 +103,7 @@ impl OrderRepo {
 
     /// 将某个众筹项目的所有已支付订单批量设为退款状态
     pub async fn refund_by_campaign(
-        pool: &sqlx::PgPool,
+        tx: &mut Transaction<'_, Postgres>,
         campaign_id: Uuid,
     ) -> Result<(), AppError> {
         sqlx::query!(
@@ -114,7 +114,7 @@ impl OrderRepo {
             "#,
             campaign_id
         )
-        .execute(pool)
+        .execute(&mut **tx)
         .await?;
         Ok(())
     }

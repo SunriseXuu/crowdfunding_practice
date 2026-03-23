@@ -1,5 +1,4 @@
 mod api_doc;
-mod app_state;
 mod config;
 mod dto;
 mod error;
@@ -12,14 +11,13 @@ mod service;
 mod util;
 mod worker;
 
-pub use app_state::AppState;
-
 use config::AppConfig;
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+use util::AppState;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 

@@ -1,7 +1,11 @@
 use sqlx::PgPool;
 use tracing::{info, warn};
 
-use crate::{error::AppError, model::CampaignStatus, repository::CampaignRepo};
+use crate::{
+    error::AppError,
+    model::CampaignStatus,
+    repository::{CampaignRepo, OrderRepo},
+};
 
 pub struct SettlementService;
 
@@ -49,12 +53,7 @@ impl SettlementService {
 
             // B. 如果失败，将订单设为退款
             if !is_success {
-                sqlx::query!(
-                    "UPDATE orders SET status = 'Refunded' WHERE campaign_id = $1 AND status = 'Paid'",
-                    id
-                )
-                .execute(&mut *tx)
-                .await?;
+                OrderRepo::refund_by_campaign(&mut tx, id).await?;
                 warn!(
                     "💸 [Settlement] Campaign failed. Orders from '{}' mark as Refunded",
                     id
