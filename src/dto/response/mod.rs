@@ -7,5 +7,5 @@ pub mod user_res;
 pub use api_res::{ApiResponse, NoData};
 pub use auth_res::{AuthTokensRes, LoginRes};
 pub use campaign_res::CampaignRes;
-pub use order_res::OrderRes;
+pub use order_res::{MyOrderRes, OrderRes};
 pub use user_res::UserRes;

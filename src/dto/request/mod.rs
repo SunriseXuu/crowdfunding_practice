@@ -5,5 +5,5 @@ pub mod user_req;
 
 pub use auth_req::{LoginReq, RefreshReq, RegisterReq};
 pub use campaign_req::{CampaignQueryReq, CreateCampaignReq, UpdateCampaignReq};
-pub use order_req::CreateOrderReq;
+pub use order_req::{CreateOrderReq, OrderQueryReq};
 pub use user_req::{UpdatePasswordReq, UpdateUserReq};

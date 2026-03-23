@@ -1,9 +1,15 @@
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::dto::request::order_req::CreateOrderReq;
-use crate::error::AppError;
-use crate::model::Order;
+use crate::{
+    dto::{
+        request::{CreateOrderReq, OrderQueryReq},
+        response::MyOrderRes,
+    },
+    error::AppError,
+    model::Order,
+    util::{PageParams, PagedRes},
+};
 
 pub struct OrderRepo;
 
@@ -29,5 +35,69 @@ impl OrderRepo {
         .await?;
 
         Ok(order)
+    }
+
+    /// 获取个人订单列表（连表查询 campaign 标题和状态）
+    pub async fn list_me(
+        pool: &sqlx::PgPool,
+        user_id: Uuid,
+        query: &OrderQueryReq,
+        page_params: &PageParams,
+    ) -> Result<PagedRes<MyOrderRes>, AppError> {
+        // 构建带有联合查询的 SQL
+        let mut qb = sqlx::QueryBuilder::new(
+            r#"
+                SELECT 
+                    o.id, 
+                    o.campaign_id, 
+                    c.title as campaign_title, 
+                    c.status as "campaign_status: crate::model::CampaignStatus",
+                    o.amount, 
+                    o.status as "status: crate::model::OrderStatus", 
+                    o.created_at
+                FROM orders o
+                INNER JOIN campaigns c ON o.campaign_id = c.id
+                WHERE o.user_id = 
+            "#,
+        );
+        qb.push_bind(user_id);
+
+        let mut count_qb =
+            sqlx::QueryBuilder::new("SELECT COUNT(o.id) FROM orders o WHERE o.user_id = ");
+        count_qb.push_bind(user_id);
+
+        // 处理查询参数
+        if let Some(status) = &query.status {
+            qb.push(" AND o.status = ");
+            qb.push_bind(status);
+            count_qb.push(" AND o.status = ");
+            count_qb.push_bind(status);
+        }
+
+        if let Some(campaign_id) = &query.campaign_id {
+            qb.push(" AND o.campaign_id = ");
+            qb.push_bind(campaign_id);
+            count_qb.push(" AND o.campaign_id = ");
+            count_qb.push_bind(campaign_id);
+        }
+
+        // 查总量
+        let total: i64 = count_qb.build_query_scalar().fetch_one(pool).await?;
+
+        // 分页
+        qb.push(" ORDER BY o.created_at DESC LIMIT ");
+        qb.push_bind(page_params.limit());
+        qb.push(" OFFSET ");
+        qb.push_bind(page_params.offset());
+
+        // 使用 as! 宏强转类型
+        let items = qb.build_query_as::<MyOrderRes>().fetch_all(pool).await?;
+
+        Ok(PagedRes::new(
+            items,
+            total,
+            page_params.page,
+            page_params.size,
+        ))
     }
 }

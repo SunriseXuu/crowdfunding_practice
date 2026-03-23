@@ -14,7 +14,7 @@ use crate::{
     error::AppError,
     extractor::{AuthenticatedUser, ValidatedJson},
     service::CampaignService,
-    util::pagination::PageParams,
+    util::PageParams,
 };
 
 /// 创建众筹项目接口

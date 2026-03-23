@@ -9,7 +9,7 @@ use crate::{
     error::AppError,
     model::CampaignStatus,
     repository::CampaignRepo,
-    util::pagination::{PageParams, PagedRes},
+    util::{PageParams, PagedRes},
 };
 
 pub struct CampaignService;

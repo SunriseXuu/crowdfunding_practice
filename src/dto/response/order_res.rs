@@ -1,12 +1,13 @@
 use chrono::{DateTime, Utc};
 use serde::Serialize;
+use sqlx::FromRow;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::model::Order;
-use crate::model::order_model::OrderStatus;
+use crate::model::{CampaignStatus, Order, OrderStatus};
 
 /// 订单响应结构
-#[derive(Debug, Serialize, utoipa::ToSchema)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct OrderRes {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -27,4 +28,16 @@ impl From<Order> for OrderRes {
             created_at: order.created_at,
         }
     }
+}
+
+/// 个人订单响应（联合众筹项目表）
+#[derive(Debug, Serialize, ToSchema, FromRow)]
+pub struct MyOrderRes {
+    pub id: Uuid,
+    pub campaign_id: Uuid,
+    pub campaign_title: String,
+    pub campaign_status: CampaignStatus,
+    pub amount: i64,
+    pub status: OrderStatus,
+    pub created_at: DateTime<Utc>,
 }

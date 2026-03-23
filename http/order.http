@@ -31,3 +31,9 @@ Authorization: {{user_token}}
 
 ### 3. 查看项目详情 (验证金额是否增长)
 GET {{base_url}}/campaigns/{{campaign_id}}
+
+### 4. 获取个人订单列表 (自动联表查众筹名称)
+# @name list_my_orders
+# 支持条件: status=Paid, campaign_id=xxx
+GET {{base_url}}/orders/me?page=1&size=10
+Authorization: {{user_token}}

@@ -1,7 +1,7 @@
 use crate::{
     dto::request::{CampaignQueryReq, CreateCampaignReq, UpdateCampaignReq},
     dto::response::{ApiResponse, CampaignRes, NoData},
-    util::pagination::{PageParams, PagedRes},
+    util::{PageParams, PagedRes},
 };
 
 #[utoipa::path(

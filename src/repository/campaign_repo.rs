@@ -5,7 +5,7 @@ use crate::{
     dto::request::{CampaignQueryReq, CreateCampaignReq, UpdateCampaignReq},
     error::AppError,
     model::{Campaign, CampaignStatus},
-    util::pagination::{PageParams, PagedRes},
+    util::{PageParams, PagedRes},
 };
 
 pub struct CampaignRepo;

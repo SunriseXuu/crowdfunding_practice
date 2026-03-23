@@ -1,11 +1,16 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::dto::request::order_req::CreateOrderReq;
-use crate::dto::response::order_res::OrderRes;
-use crate::error::AppError;
-use crate::model::CampaignStatus;
-use crate::repository::{CampaignRepo, OrderRepo};
+use crate::{
+    dto::{
+        request::{CreateOrderReq, OrderQueryReq},
+        response::{MyOrderRes, OrderRes},
+    },
+    error::AppError,
+    model::CampaignStatus,
+    repository::{CampaignRepo, OrderRepo},
+    util::{PageParams, PagedRes},
+};
 
 pub struct OrderService;
 
@@ -49,5 +54,15 @@ impl OrderService {
         tx.commit().await?;
 
         Ok(OrderRes::from(order))
+    }
+
+    /// 获取个人订单分页列表
+    pub async fn list_me(
+        pool: &PgPool,
+        user_id: Uuid,
+        query: OrderQueryReq,
+        page_params: PageParams,
+    ) -> Result<PagedRes<MyOrderRes>, AppError> {
+        OrderRepo::list_me(pool, user_id, &query, &page_params).await
     }
 }
