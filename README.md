@@ -1,4 +1,4 @@
-# Crowdfunding Practice (Rust + Axum)
+# Crowdfunding Backend Project Implemented with Rust + Axum attached to Bovilife
 
 这是一个使用 Rust 语言和 **Axum** 框架构建的企业级现代化后端平台实战项目。
 

@@ -38,7 +38,7 @@ pub fn sign_token(
     let claims = Claims {
         sub: user_id,
         role,
-        iss: "crowdfunding_practice".to_string(),
+        iss: "crowdfunding_axum".to_string(),
         iat: now.timestamp() as usize,
         exp: expire_at.timestamp() as usize,
     };
