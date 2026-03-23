@@ -116,9 +116,10 @@ sequenceDiagram
 - **Refresh Token 续签通道**：有效期 7 天。跨端前端项目通过调用 `POST /api/v1/auth/refresh` 可实现完全无感的自动续期。
 - **RBAC 超级门卫**：载荷中嵌入了 `UserRole`（`User` / `Admin`）。为管理员专用路由构建了 `AdminUser` 权限提取器，一旦检测到越权操作即刻硬性拒绝（403 Forbidden）。
 
-### 5. 众筹业务状态机与金额精度
+### 5. 众筹业务状态机与并发安全
 - **金额精度约束**：全局硬性约束。所有金额在 PG/Rust 中一律存储为 `BIGINT` (单位：分)，从根本上规避浮点数计算导致的精度丢失。
 - **状态流转控制**：实现 `Pending` -> `Active` -> `Funded`/`Failed`/`Cancelled` 的严格状态机控制。
+- **并发级别的一致性**：在订单与金额更新链路中落实了 `SELECT FOR UPDATE` 行级锁，结合原子状态机，彻底防止高并发下的超卖现象。
 
 ### 6. ApiResponse 全局统一切面
 所有接口强制返回统一规范的 JSON，并且内部集成各种各样的错误抛出。
@@ -233,3 +234,6 @@ cargo watch -x run
 ### 🛡 Admin 模块 (需身份: `UserRole::Admin`)
 - `DELETE /api/v1/admin/users/{id}`: 强制封禁账号
 - `DELETE /api/v1/admin/campaigns/{id}`: 强制下架违规项目
+
+### 💸 Order 模块 (投资与交易)
+- `POST /api/v1/orders`: 发起投资 (需认证，涉及行级锁事务)
