@@ -1,9 +1,12 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::dto::request::campaign_req::{CreateCampaignReq, UpdateCampaignReq};
-use crate::error::AppError;
-use crate::model::{Campaign, CampaignStatus};
+use crate::{
+    dto::request::{CampaignQueryReq, CreateCampaignReq, UpdateCampaignReq},
+    error::AppError,
+    model::{Campaign, CampaignStatus},
+    util::pagination::{PageParams, PagedRes},
+};
 
 pub struct CampaignRepo;
 
@@ -35,22 +38,60 @@ impl CampaignRepo {
         Ok(campaign)
     }
 
-    /// 获取活跃的众筹项目列表数据库操作
-    pub async fn list_active(pool: &PgPool) -> Result<Vec<Campaign>, AppError> {
-        let campaigns = sqlx::query_as!(
-            Campaign,
+    /// 获取众筹项目列表数据库操作, 支持分页、动态条件查询
+    pub async fn list(
+        pool: &PgPool,
+        query: &CampaignQueryReq,
+        page_params: &PageParams,
+    ) -> Result<PagedRes<Campaign>, AppError> {
+        let mut qb = sqlx::QueryBuilder::new(
             r#"
                 SELECT id, creator_id, title, description, goal_amount, current_amount, 
-                    status as "status: CampaignStatus", start_at, end_at, created_at, updated_at
-                FROM campaigns
-                WHERE status = 'Active'
-                ORDER BY created_at DESC
-            "#
-        )
-        .fetch_all(pool)
-        .await?;
+                    status as "status: CampaignStatus", start_at, end_at, created_at, updated_at 
+                FROM campaigns WHERE 1=1 
+            "#,
+        );
 
-        Ok(campaigns)
+        let mut count_qb = sqlx::QueryBuilder::new(
+            r#"
+                SELECT COUNT(id) FROM campaigns WHERE 1=1 
+            "#,
+        );
+
+        // 处理动态查询参数 (过滤状态)
+        if let Some(status) = &query.status {
+            qb.push(" AND status = ");
+            qb.push_bind(status);
+            count_qb.push(" AND status = ");
+            count_qb.push_bind(status);
+        }
+
+        // 处理模糊查询 (LIKE)
+        if let Some(title) = &query.title {
+            qb.push(" AND title ILIKE "); // ILIKE = 大小写不敏感的 LIKE
+            qb.push_bind(format!("%{}%", title));
+            count_qb.push(" AND title ILIKE ");
+            count_qb.push_bind(format!("%{}%", title));
+        }
+
+        // 总量查询
+        let total: i64 = count_qb.build_query_scalar().fetch_one(pool).await?;
+
+        // 排序与分页
+        qb.push(" ORDER BY created_at DESC LIMIT ");
+        qb.push_bind(page_params.limit());
+        qb.push(" OFFSET ");
+        qb.push_bind(page_params.offset());
+
+        // 执行查询（返回强类型）
+        let campaigns = qb.build_query_as::<Campaign>().fetch_all(pool).await?;
+
+        Ok(PagedRes::new(
+            campaigns,
+            total,
+            page_params.page,
+            page_params.size,
+        ))
     }
 
     /// 根据ID获取众筹项目数据库操作

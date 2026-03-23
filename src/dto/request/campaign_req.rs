@@ -3,6 +3,14 @@ use serde::Deserialize;
 use utoipa::ToSchema;
 use validator::Validate;
 
+use crate::model::CampaignStatus;
+
+#[derive(Debug, Deserialize, utoipa::IntoParams)]
+pub struct CampaignQueryReq {
+    pub title: Option<String>,
+    pub status: Option<CampaignStatus>,
+}
+
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct CreateCampaignReq {
     #[validate(length(min = 2, max = 100, message = "标题长度需在 2-100 之间"))]

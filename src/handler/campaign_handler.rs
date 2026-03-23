@@ -1,16 +1,21 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     response::IntoResponse,
 };
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::AppState;
-use crate::dto::ApiResponse;
-use crate::dto::request::campaign_req::{CreateCampaignReq, UpdateCampaignReq};
-use crate::error::AppError;
-use crate::extractor::{AuthenticatedUser, ValidatedJson};
-use crate::service::CampaignService;
+use crate::{
+    AppState,
+    dto::{
+        ApiResponse,
+        request::campaign_req::{CampaignQueryReq, CreateCampaignReq, UpdateCampaignReq},
+    },
+    error::AppError,
+    extractor::{AuthenticatedUser, ValidatedJson},
+    service::CampaignService,
+    util::pagination::PageParams,
+};
 
 /// 创建众筹项目接口
 pub async fn create(
@@ -22,11 +27,13 @@ pub async fn create(
     Ok(ApiResponse::success(res))
 }
 
-/// 获取活跃的众筹列表接口
-pub async fn list_active(
+/// 获取众筹项目列表接口
+pub async fn list(
     State(state): State<Arc<AppState>>,
+    Query(query): Query<CampaignQueryReq>,
+    Query(page_params): Query<PageParams>,
 ) -> Result<impl IntoResponse, AppError> {
-    let res = CampaignService::list_active(&state.pool).await?;
+    let res = CampaignService::list(&state.pool, query, page_params).await?;
     Ok(ApiResponse::success(res))
 }
 

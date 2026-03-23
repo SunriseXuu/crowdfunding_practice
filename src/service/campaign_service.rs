@@ -1,11 +1,16 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::dto::request::campaign_req::{CreateCampaignReq, UpdateCampaignReq};
-use crate::dto::response::campaign_res::CampaignRes;
-use crate::error::AppError;
-use crate::model::CampaignStatus;
-use crate::repository::CampaignRepo;
+use crate::{
+    dto::{
+        request::campaign_req::{CampaignQueryReq, CreateCampaignReq, UpdateCampaignReq},
+        response::campaign_res::CampaignRes,
+    },
+    error::AppError,
+    model::CampaignStatus,
+    repository::CampaignRepo,
+    util::pagination::{PageParams, PagedRes},
+};
 
 pub struct CampaignService;
 
@@ -25,10 +30,27 @@ impl CampaignService {
         Ok(CampaignRes::from(campaign))
     }
 
-    /// 获取活跃的众筹项目列表业务
-    pub async fn list_active(pool: &PgPool) -> Result<Vec<CampaignRes>, AppError> {
-        let campaigns = CampaignRepo::list_active(pool).await?;
-        Ok(campaigns.into_iter().map(CampaignRes::from).collect())
+    /// 获取众筹项目列表业务
+    pub async fn list(
+        pool: &PgPool,
+        query: CampaignQueryReq,
+        page_params: PageParams,
+    ) -> Result<PagedRes<CampaignRes>, AppError> {
+        let paged_data = CampaignRepo::list(pool, &query, &page_params).await?;
+
+        let res_items: Vec<CampaignRes> = paged_data
+            .items
+            .into_iter()
+            .map(CampaignRes::from)
+            .collect();
+
+        Ok(PagedRes {
+            items: res_items,
+            total: paged_data.total,
+            page: paged_data.page,
+            size: paged_data.size,
+            has_next: paged_data.has_next,
+        })
     }
 
     /// 获取一个众筹项目业务

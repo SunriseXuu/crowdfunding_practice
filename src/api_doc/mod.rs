@@ -8,13 +8,22 @@ pub mod campaign_api_doc;
 pub mod order_api_doc;
 pub mod user_api_doc;
 
-pub use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
-pub use utoipa::{Modify, OpenApi};
+pub use utoipa::{
+    Modify, OpenApi,
+    openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
+};
 
-pub use crate::dto::request::auth_req::RefreshReq;
-pub use crate::dto::request::*;
-pub use crate::dto::response::{api_res::ApiResponse, api_res::NoData, *};
-pub use crate::model::Gender;
+pub use crate::{
+    dto::{
+        request::{
+            CreateCampaignReq, CreateOrderReq, LoginReq, RefreshReq, RegisterReq,
+            UpdateCampaignReq, UpdatePasswordReq, UpdateUserReq,
+        },
+        response::{ApiResponse, AuthTokensRes, CampaignRes, LoginRes, NoData, OrderRes, UserRes},
+    },
+    model::Gender,
+    util::pagination::PagedRes,
+};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -29,7 +38,7 @@ pub use crate::model::Gender;
         admin_api_doc::ban_user,
         admin_api_doc::cancel_campaign,
         campaign_api_doc::create_campaign,
-        campaign_api_doc::list_active_campaigns,
+        campaign_api_doc::list_campaigns,
         campaign_api_doc::retrieve_campaign,
         campaign_api_doc::update_campaign,
         campaign_api_doc::cancel_campaign,
@@ -41,8 +50,9 @@ pub use crate::model::Gender;
             ApiResponse<LoginRes>,
             ApiResponse<UserRes>,
             ApiResponse<CampaignRes>,
-            ApiResponse<Vec<CampaignRes>>,
+            ApiResponse<PagedRes<CampaignRes>>,
             ApiResponse<OrderRes>,
+            PagedRes<CampaignRes>,
             AuthTokensRes,
             Gender,
             LoginReq,
