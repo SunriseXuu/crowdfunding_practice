@@ -32,9 +32,11 @@ src/
 ├── service/           # 业务逻辑层 (胖服务)：最核心的包，处理所有与业务相关的逻辑
 ├── dto/               # 数据传输对象 (Data Transfer Object)：隔离层。定义外部 Request 与 Response 格式
 ├── handler/           # 控制器层 (瘦控制器)：解析 HTTP 协议，调用 Extractor 提炼用户参数后，纯转发调度给 Service
-├── router/            # 路由网关层：定义各类模块（如 auth, user）的路由表，彻底解耦 Handler 与具体的 URL
-├── extractor/         # 提取器层 (Extractor)：包含统一参数验证 (ValidatedJson) 与鉴权拦截器 (AuthUser)
-└── error/             # 全局错误处理：实现 IntoResponse，抹平所有内部异常并统一序列化为 JSON 返回
+├── router/            # 路由网格层：分模块（auth, user, campaign, order, admin）挂载路由表
+├── extractor/         # 提取器层：包含 Token 校验、管理员校验及 JSON 自动验证
+├── worker/            # 后台任务层 (Worker)：包含独立运行的结算引擎 (Settlement Cron)
+├── util/              # 工具库：JWT 处理、通用分页 (Pagination)、全局状态声明 (AppState)
+└── error/             # 错误处理：统一异常切面封装
 ```
 
 ---
@@ -140,6 +142,16 @@ sequenceDiagram
 
 ---
 
+### 8. 自动化结算引擎 (Worker) 与状态流转
+项目内置了一个轻量级的后台任务调度系统，无需外部 Cron 依赖：
+- **异步调度**：利用 `tokio::spawn` 随 Web 服务一同启动，每 60 秒自动唤醒。
+- **自动结项**：自动扫描所有过期的活跃项目，根据募资额判定 `Funded` (成功) 或 `Failed` (失败)。
+- **联动退款**：在同一个数据库事务中，一旦判定众筹失败，系统会瞬间将所有关联订单状态同步更新为 `Refunded`。
+
+### 9. 标准化分页与检索系统
+- **通用包装**：抽象了 `PageParams` 和 `PagedRes<T>`，支持全站统一的分页输出格式。
+- **动态 SQL**：基于 `sqlx::QueryBuilder` 实现动态查询，支持按标题模糊匹配、按状态过滤以及分页组合查询。
+
 ## 🚀 本地开发指南
 
 ### 1. 环境准备与依赖
@@ -237,3 +249,4 @@ cargo watch -x run
 
 ### 💸 Order 模块 (投资与交易)
 - `POST /api/v1/orders`: 发起投资 (需认证，涉及行级锁事务)
+- `GET /api/v1/orders/me`: 获取个人投资历史 (支持分页、按状态/项目过滤)
