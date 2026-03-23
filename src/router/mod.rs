@@ -1,6 +1,7 @@
 pub mod admin_router;
 pub mod auth_router;
 pub mod campaign_router;
+pub mod order_router;
 pub mod user_router;
 
 use axum::Router;
@@ -18,6 +19,8 @@ pub fn init_router(state: Arc<AppState>) -> Router {
         .nest("/api/v1/users", user_router::routes())
         // 挂载众筹模块路由
         .nest("/api/v1/campaigns", campaign_router::routes())
+        // 挂载订单模块路由
+        .nest("/api/v1/orders", order_router::routes())
         // 挂载管理员模块路由
         .nest("/api/v1/admin", admin_router::routes())
         // 挂载状态

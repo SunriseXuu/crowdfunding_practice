@@ -5,6 +5,7 @@
 pub mod admin_api_doc;
 pub mod auth_api_doc;
 pub mod campaign_api_doc;
+pub mod order_api_doc;
 pub mod user_api_doc;
 
 pub use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
@@ -32,6 +33,7 @@ pub use crate::model::Gender;
         campaign_api_doc::retrieve_campaign,
         campaign_api_doc::update_campaign,
         campaign_api_doc::cancel_campaign,
+        order_api_doc::create_order,
     ),
     components(
         schemas(
@@ -40,6 +42,7 @@ pub use crate::model::Gender;
             ApiResponse<UserRes>,
             ApiResponse<CampaignRes>,
             ApiResponse<Vec<CampaignRes>>,
+            ApiResponse<OrderRes>,
             AuthTokensRes,
             Gender,
             LoginReq,
@@ -51,7 +54,9 @@ pub use crate::model::Gender;
             UpdateUserReq,
             CreateCampaignReq,
             UpdateCampaignReq,
+            CreateOrderReq,
             CampaignRes,
+            OrderRes,
             UserRes,
         )
     ),

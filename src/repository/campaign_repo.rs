@@ -104,6 +104,28 @@ impl CampaignRepo {
         Ok(campaign)
     }
 
+    /// 根据ID获取众筹项目并加行级锁（用于事务中的并发控制）
+    pub async fn find_by_id_for_update(
+        tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+        id: Uuid,
+    ) -> Result<Option<Campaign>, AppError> {
+        let campaign = sqlx::query_as!(
+            Campaign,
+            r#"
+                SELECT id, creator_id, title, description, goal_amount, current_amount, 
+                    status as "status: CampaignStatus", start_at, end_at, created_at, updated_at
+                FROM campaigns
+                WHERE id = $1
+                FOR UPDATE
+            "#,
+            id
+        )
+        .fetch_optional(&mut **tx)
+        .await?;
+
+        Ok(campaign)
+    }
+
     /// 更新众筹项目状态数据库操作
     pub async fn update_status(
         pool: &PgPool,

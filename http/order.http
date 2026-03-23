@@ -1,0 +1,33 @@
+### 订单与投资模块接口测试 (Order Module)
+
+@base_url = http://localhost:8080/api/v1
+
+# 💡 请先从 auth.http 注册并登录一个普通用户（非项目发起人更具代表性）
+@user_token = Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3M2RhNTRkYy03Nzc1LTQ2NjktYjhjNS0yZTlhNjU4MWJhMjQiLCJyb2xlIjoiVXNlciIsImlzcyI6ImNyb3dkZnVuZGluZ19wcmFjdGljZSIsImlhdCI6MTc3MzkzNDExMSwiZXhwIjoxNzczOTM1MDExfQ.OUyyunMo18Vj0zj2WB8Dj20gFgDZFDdPm-_cBsDbUVk
+
+# 💡 请从 campaign.http 获取一个处于 Active 状态的项目 ID
+@campaign_id = 123e4567-e89b-12d3-a456-426614174001
+
+### 1. 发起投资 (Create Order)
+# @name create_order
+POST {{base_url}}/orders
+Content-Type: application/json
+Authorization: {{user_token}}
+
+{
+    "campaign_id": "{{campaign_id}}",
+    "amount": 500000
+}
+
+### 2. 再次发起投资 (验证并发累加)
+POST {{base_url}}/orders
+Content-Type: application/json
+Authorization: {{user_token}}
+
+{
+    "campaign_id": "{{campaign_id}}",
+    "amount": 100000
+}
+
+### 3. 查看项目详情 (验证金额是否增长)
+GET {{base_url}}/campaigns/{{campaign_id}}

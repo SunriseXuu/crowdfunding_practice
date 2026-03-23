@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE campaigns\n                SET title = COALESCE($1, title),\n                    description = COALESCE($2, description),\n                    goal_amount = COALESCE($3, goal_amount),\n                    start_at = COALESCE($4, start_at),\n                    end_at = COALESCE($5, end_at),\n                    updated_at = CURRENT_TIMESTAMP\n                WHERE id = $6\n                RETURNING id, creator_id, title, description, goal_amount, current_amount, \n                        status as \"status: CampaignStatus\", start_at, end_at, created_at, updated_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "creator_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "goal_amount",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "current_amount",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "status: CampaignStatus",
+        "type_info": {
+          "Custom": {
+            "name": "campaign_status",
+            "kind": {
+              "Enum": [
+                "Pending",
+                "Active",
+                "Funded",
+                "Failed",
+                "Cancelled"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "start_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "end_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Text",
+        "Int8",
+        "Timestamptz",
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f017a95020c8b4b1e399e1aabf6d426d51ad51f0dd72d718f57fc0dbb939bb6a"
+}
