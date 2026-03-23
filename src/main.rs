@@ -1,4 +1,5 @@
 mod api_doc;
+mod app_state;
 mod config;
 mod dto;
 mod error;
@@ -9,6 +10,9 @@ mod repository;
 mod router;
 mod service;
 mod util;
+mod worker;
+
+pub use app_state::AppState;
 
 use config::AppConfig;
 use sqlx::postgres::PgPoolOptions;
@@ -18,18 +22,6 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-
-/// AppState 是整个应用的"全局共享上下文"。
-///
-/// 类比前端的 React Context 或 Pinia Store：
-/// 任何一个 Handler 都可以通过 Axum 的依赖注入拿到这个对象。
-/// 我们用 Arc 包裹它，是因为 Axum 会在多个异步线程间复用这个状态，
-/// Arc（原子引用计数）可以安全地让多个所有者共享同一份数据，而不用复制它。
-#[derive(Clone)]
-pub struct AppState {
-    pub pool: sqlx::PgPool,
-    pub config: Arc<AppConfig>,
-}
 
 #[tokio::main]
 async fn main() {
@@ -59,12 +51,15 @@ async fn main() {
 
     // ── 步骤四：组装全局 AppState ────────────────────────────────────────────
     let port = config.port;
-    let state = Arc::new(AppState {
-        pool,
-        config: Arc::new(config),
+    let state = Arc::new(AppState::new(pool, config));
+
+    // ── 步骤五：启动后台异步任务 (Worker) ──────────────────────────────────
+    let worker_state = Arc::clone(&state);
+    tokio::spawn(async move {
+        worker::settlement_worker::start(worker_state).await;
     });
 
-    // ── 步骤五：配置 Axum 路由并启动服务器 ──────────────────────────────────
+    // ── 步骤六：配置 Axum 路由并启动服务器 ──────────────────────────────────
     let app = router::init_router(state)
         .merge(
             SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api_doc::ApiDoc::openapi()),

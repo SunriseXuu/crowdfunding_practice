@@ -94,6 +94,23 @@ impl CampaignRepo {
         ))
     }
 
+    /// 查找所有已过期且仍处于 Active 状态的众筹项目
+    pub async fn list_expired_active(pool: &PgPool) -> Result<Vec<Campaign>, AppError> {
+        let campaigns = sqlx::query_as!(
+            Campaign,
+            r#"
+                SELECT id, creator_id, title, description, goal_amount, current_amount, 
+                    status as "status: CampaignStatus", start_at, end_at, created_at, updated_at
+                FROM campaigns
+                WHERE status = 'Active' AND end_at <= CURRENT_TIMESTAMP
+            "#
+        )
+        .fetch_all(pool)
+        .await?;
+
+        Ok(campaigns)
+    }
+
     /// 根据ID获取众筹项目数据库操作
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Campaign>, AppError> {
         let campaign = sqlx::query_as!(

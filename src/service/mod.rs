@@ -2,10 +2,12 @@ pub mod admin_service;
 pub mod auth_service;
 pub mod campaign_service;
 pub mod order_service;
+pub mod settlement_service;
 pub mod user_service;
 
 pub use admin_service::AdminService;
 pub use auth_service::AuthService;
 pub use campaign_service::CampaignService;
 pub use order_service::OrderService;
+pub use settlement_service::SettlementService;
 pub use user_service::UserService;

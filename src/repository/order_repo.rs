@@ -100,4 +100,22 @@ impl OrderRepo {
             page_params.size,
         ))
     }
+
+    /// 将某个众筹项目的所有已支付订单批量设为退款状态
+    pub async fn refund_by_campaign(
+        pool: &sqlx::PgPool,
+        campaign_id: Uuid,
+    ) -> Result<(), AppError> {
+        sqlx::query!(
+            r#"
+                UPDATE orders 
+                SET status = 'Refunded' 
+                WHERE campaign_id = $1 AND status = 'Paid'
+            "#,
+            campaign_id
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
 }
